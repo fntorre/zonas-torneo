@@ -1,0 +1,126 @@
+/* =========================================================
+   Zonas y Partidos de Fútbol - Admin
+   ========================================================= */
+
+/* ---------------------- Badges --------------------------- */
+
+.zf-badge {
+	display: inline-block;
+	padding: 2px 11px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.8;
+	border: 1px solid transparent;
+}
+.zf-badge-finalizado {
+	background: #edf7f1;
+	color: #116032;
+	border-color: #bfe4cd;
+}
+.zf-badge-programado {
+	background: #f0f6fc;
+	color: #135e96;
+	border-color: #c5d9ed;
+}
+.zf-badge-suspendido {
+	background: #fcf0f1;
+	color: #b32d2e;
+	border-color: #f0c7c8;
+}
+
+/* ------------- Metabox "Datos del partido" ---------------- */
+
+.zf-meta-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 14px 18px;
+	margin-top: 6px;
+	padding-top: 14px;
+	border-top: 1px solid #f0f0f1;
+}
+.zf-meta-grid p {
+	margin: 0;
+}
+.zf-meta-grid label {
+	display: block;
+	margin-bottom: 5px;
+	font-weight: 600;
+	color: #1d2327;
+}
+.zf-meta-grid select,
+.zf-meta-grid input[type="text"],
+.zf-meta-grid input[type="datetime-local"],
+.zf-meta-grid input[type="number"] {
+	width: 100%;
+	max-width: none;
+	background: #fff;
+	border-radius: 4px;
+	min-height: 32px;
+}
+.zf-meta-grid select:focus,
+.zf-meta-grid input:focus {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+	outline: 2px solid transparent;
+}
+.zf-meta-grid .zf-meta-aviso {
+	display: block;
+	margin-top: 6px;
+	color: #b32d2e;
+	font-weight: 600;
+}
+.zf-metabox-nota {
+	margin-top: 14px !important;
+	padding: 10px 12px;
+	background: #f6f7f7;
+	border-left: 4px solid #2271b1;
+	border-radius: 0 4px 4px 0;
+}
+
+/* --------------- Páginas propias del menú ------------------ */
+
+.zf-admin-page .zf-admin-descripcion {
+	max-width: 720px;
+	color: #50575e;
+	margin-bottom: 18px;
+}
+.zf-admin-page .zf-admin-panel {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 8px;
+	padding: 20px 24px;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+	margin-bottom: 24px;
+	overflow-x: auto;
+}
+
+/* Equipos por zona */
+.zf-admin-page table.wp-list-table tbody tr:hover {
+	background: #f6f7f7;
+}
+.zf-admin-page table.wp-list-table select {
+	min-width: 200px;
+}
+.zf-admin-page .zf-admin-guardar {
+	margin-top: 16px;
+}
+
+/* Vista previa de posiciones dentro del admin
+   (usa el tema oscuro del front como vista real) */
+.zf-admin-posiciones .zf-tabla-wrap,
+.zf-admin-page .zf-tabla-wrap {
+	max-width: 780px;
+	margin: 0 0 24px;
+}
+
+/* Columnas de la lista de partidos */
+.column-zf_zona,
+.column-zf_fecha,
+.column-zf_marcador {
+	width: 16%;
+}
+.column-zf_marcador strong {
+	font-size: 15px;
+	letter-spacing: .03em;
+}

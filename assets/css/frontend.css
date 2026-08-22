@@ -1,0 +1,776 @@
+/* =========================================================
+   Zonas y Partidos de Fútbol · Frontend
+   Sistema de diseño oscuro premium
+   ---------------------------------------------------------
+   Todos los estilos viven bajo clases .zf-* y variables
+   --zf-* para poder personalizarse desde el tema activo.
+   ========================================================= */
+
+/* ------------------------- Tokens ------------------------ */
+
+.zf-zonas,
+.zf-tablas,
+.zf-lista {
+	--zf-bg: #0b0e14;
+	--zf-panel: #121722;
+	--zf-panel-2: #182030;
+	--zf-panel-3: #1f2940;
+	--zf-borde: #263149;
+	--zf-borde-suave: rgba(255, 255, 255, .07);
+	--zf-texto: #f5f8fd;
+	--zf-mutado: #93a1ba;
+	--zf-acento: #22c55e;
+	--zf-acento-suave: rgba(34, 197, 94, .14);
+	--zf-dorado: #fbbf24;
+	--zf-rojo: #ef4444;
+	--zf-azul: #60a5fa;
+
+	--zf-radio: 16px;
+	--zf-radio-sm: 10px;
+	--zf-sombra: 0 12px 32px rgba(2, 6, 16, .45), 0 2px 6px rgba(2, 6, 16, .35);
+	--zf-transicion: .18s cubic-bezier(.4, 0, .2, 1);
+
+	color-scheme: dark;
+	display: grid;
+	gap: 20px;
+	color: var(--zf-texto);
+	font-variant-numeric: tabular-nums;
+	line-height: 1.5;
+}
+
+/* ---------------------- Estado vacío --------------------- */
+
+.zf-vacio {
+	margin: 0;
+	padding: 26px 22px;
+	border: 1px dashed var(--zf-borde);
+	border-radius: var(--zf-radio);
+	background:
+		radial-gradient(90% 120% at 50% 0%, rgba(34, 197, 94, .05), transparent 70%),
+		rgba(255, 255, 255, .02);
+	color: var(--zf-mutado);
+	text-align: center;
+	font-size: .95rem;
+}
+
+/* ------------------- Avatar de equipo -------------------- */
+
+.zf-crest {
+	position: relative;
+	flex: 0 0 auto;
+	width: 34px;
+	height: 34px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	background: #0d1220;
+	border: 1px solid var(--zf-borde);
+	box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .03);
+	overflow: hidden;
+}
+.zf-crest img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	padding: 3px;
+}
+.zf-crest-txt {
+	background: linear-gradient(135deg, #2fd46c, #15803d);
+	border-color: transparent;
+	color: #05230f;
+	font-size: .76rem;
+	font-weight: 800;
+	letter-spacing: .02em;
+}
+/* Tamaño grande para tarjetas de partido */
+.zf-crest-lg {
+	width: 44px;
+	height: 44px;
+}
+.zf-crest-lg.zf-crest-txt {
+	font-size: .92rem;
+}
+
+/* ------------------------- Badges ------------------------ */
+
+.zf-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 12px;
+	border-radius: 999px;
+	font-size: .72rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .06em;
+	line-height: 1.4;
+	border: 1px solid transparent;
+	white-space: nowrap;
+}
+.zf-badge::before {
+	content: "";
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: currentColor;
+	flex: 0 0 auto;
+}
+.zf-badge-programado {
+	background: rgba(96, 165, 250, .12);
+	border-color: rgba(96, 165, 250, .35);
+	color: #9ec9fe;
+}
+.zf-badge-finalizado {
+	background: rgba(34, 197, 94, .12);
+	border-color: rgba(34, 197, 94, .38);
+	color: #86efac;
+}
+.zf-badge-suspendido {
+	background: rgba(239, 68, 68, .13);
+	border-color: rgba(239, 68, 68, .42);
+	color: #fca5a5;
+}
+
+/* Píldoras de forma reciente (G/E/P) */
+.zf-pill {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 21px;
+	height: 21px;
+	border-radius: 7px;
+	font-size: .66rem;
+	font-weight: 800;
+	line-height: 1;
+	color: #fff;
+}
+.zf-pill-g { background: linear-gradient(160deg, #2fd46c, #17984a); box-shadow: 0 2px 6px rgba(34, 197, 94, .35); }
+.zf-pill-e { background: linear-gradient(160deg, #f5c33b, #cf9410); box-shadow: 0 2px 6px rgba(245, 195, 59, .3); color: #241a02; }
+.zf-pill-p { background: linear-gradient(160deg, #f26d6d, #c53030); box-shadow: 0 2px 6px rgba(239, 68, 68, .3); }
+.zf-pill-vacio {
+	background: none;
+	box-shadow: none;
+	border: 1px dashed var(--zf-borde);
+	color: transparent;
+}
+
+/* ========================= ZONAS ========================= */
+
+.zf-zona-card {
+	position: relative;
+	background:
+		radial-gradient(130% 100% at 50% 0%, rgba(34, 197, 94, .08), transparent 58%),
+		var(--zf-panel);
+	border: 1px solid var(--zf-borde);
+	border-radius: var(--zf-radio);
+	padding: 20px 22px 22px;
+	box-shadow: var(--zf-sombra);
+	overflow: hidden;
+	animation: zf-in .5s ease backwards;
+}
+
+.zf-zona-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin-bottom: 16px;
+	padding-bottom: 14px;
+	border-bottom: 1px solid var(--zf-borde-suave);
+}
+
+.zf-zona-titulo {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0;
+	font-size: 1.08rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .09em;
+	color: var(--zf-texto);
+}
+.zf-zona-titulo::before {
+	content: "";
+	width: 4px;
+	height: 19px;
+	border-radius: 3px;
+	background: linear-gradient(180deg, var(--zf-acento), var(--zf-acento-osc, #15803d));
+	flex: 0 0 auto;
+}
+
+.zf-zona-count {
+	padding: 3px 11px;
+	border-radius: 999px;
+	background: var(--zf-acento-suave);
+	border: 1px solid rgba(34, 197, 94, .3);
+	color: #86efac;
+	font-size: .72rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .06em;
+	white-space: nowrap;
+}
+
+.zf-zona-equipos {
+	list-style: none !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+	gap: 10px;
+}
+.zf-zona-equipos li {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	background: linear-gradient(180deg, var(--zf-panel-2), rgba(24, 32, 48, .55));
+	border: 1px solid var(--zf-borde);
+	border-radius: var(--zf-radio-sm);
+	padding: 9px 13px;
+	color: var(--zf-texto);
+	font-weight: 600;
+	font-size: .95rem;
+	transition: border-color var(--zf-transicion), transform var(--zf-transicion), background var(--zf-transicion);
+}
+.zf-zona-equipos li:hover {
+	border-color: rgba(34, 197, 94, .5);
+	transform: translateY(-2px);
+	background: linear-gradient(180deg, var(--zf-panel-3), var(--zf-panel-2));
+}
+.zf-zona-equipos li.zf-vacio {
+	grid-column: 1 / -1;
+	border-style: dashed;
+	transform: none;
+	padding: 14px;
+}
+
+/* =================== TABLA DE POSICIONES ================== */
+
+.zf-tabla-wrap {
+	background:
+		radial-gradient(110% 80% at 50% 0%, rgba(34, 197, 94, .06), transparent 55%),
+		var(--zf-panel);
+	border: 1px solid var(--zf-borde);
+	border-radius: var(--zf-radio);
+	box-shadow: var(--zf-sombra);
+	overflow: hidden;
+	animation: zf-in .5s ease backwards;
+}
+
+.zf-tabla-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+	padding: 18px 22px;
+	border-bottom: 1px solid var(--zf-borde-suave);
+	background: linear-gradient(180deg, rgba(255, 255, 255, .025), transparent);
+}
+.zf-tabla-titulo {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	margin: 0;
+	font-size: 1.08rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .09em;
+	color: var(--zf-texto);
+}
+.zf-tabla-titulo svg {
+	width: 19px;
+	height: 19px;
+	color: var(--zf-dorado);
+	flex: 0 0 auto;
+}
+.zf-tabla-sub {
+	padding: 3px 11px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, .04);
+	border: 1px solid var(--zf-borde-suave);
+	color: var(--zf-mutado);
+	font-size: .72rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .07em;
+	white-space: nowrap;
+}
+
+.zf-tabla-scroll {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+table.zf-tabla {
+	width: 100%;
+	margin: 0;
+	border-collapse: collapse;
+	border-spacing: 0;
+	font-size: .93rem;
+	color: var(--zf-texto);
+	background: none;
+}
+table.zf-tabla th,
+table.zf-tabla td {
+	padding: 11px 8px;
+	text-align: center;
+	border: 0;
+	background: none;
+	box-shadow: none;
+	outline: 0;
+}
+table.zf-tabla thead th {
+	position: sticky;
+	top: 0;
+	background: var(--zf-panel-2);
+	color: var(--zf-mutado);
+	font-size: .68rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .08em;
+	border-top: 1px solid var(--zf-borde-suave);
+	border-bottom: 1px solid var(--zf-borde);
+	padding: 9px 8px;
+}
+table.zf-tabla tbody tr {
+	transition: background var(--zf-transicion);
+}
+table.zf-tabla tbody tr:nth-child(even) {
+	background: rgba(255, 255, 255, .015);
+}
+table.zf-tabla tbody tr:hover {
+	background: rgba(34, 197, 94, .06);
+}
+
+/* Columna equipo */
+table.zf-tabla th.zf-col-equipo,
+table.zf-tabla td.zf-col-equipo {
+	text-align: left;
+	min-width: 185px;
+}
+table.zf-tabla td.zf-col-equipo {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	font-weight: 700;
+	white-space: nowrap;
+}
+.zf-tabla tr.zf-lider td.zf-col-equipo .zf-equipo-nombre::after {
+	content: "";
+	/* reserva sin contenido: el liderazgo ya lo marca la posición dorada */
+}
+
+/* Posición */
+table.zf-tabla td.zf-col-pos {
+	width: 52px;
+}
+.zf-pos {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 27px;
+	height: 27px;
+	padding: 0 4px;
+	border-radius: 9px;
+	background: var(--zf-panel-2);
+	border: 1px solid var(--zf-borde);
+	color: var(--zf-mutado);
+	font-weight: 800;
+	font-size: .82rem;
+}
+tr.zf-clasifica .zf-pos {
+	background: linear-gradient(150deg, rgba(47, 212, 108, .25), rgba(21, 128, 61, .25));
+	border-color: rgba(34, 197, 94, .55);
+	color: #86efac;
+	box-shadow: 0 0 0 1px rgba(34, 197, 94, .12), 0 3px 10px rgba(34, 197, 94, .18);
+}
+tr.zf-clasifica td:first-child {
+	box-shadow: inset 3px 0 0 var(--zf-acento);
+}
+
+/* Resto de columnas */
+table.zf-tabla td.zf-col-pts {
+	font-size: 1.05rem;
+	font-weight: 900;
+	color: #fff;
+}
+table.zf-tabla th.zf-col-pts {
+	color: var(--zf-dorado);
+}
+table.zf-tabla td.zf-col-dif {
+	color: var(--zf-mutado);
+	font-weight: 600;
+}
+table.zf-tabla td.zf-col-dif.zf-dif-pos { color: #86efac; }
+table.zf-tabla td.zf-col-dif.zf-dif-neg { color: #fca5a5; }
+
+/* Forma reciente */
+table.zf-tabla th.zf-col-forma,
+table.zf-tabla td.zf-col-forma {
+	min-width: 108px;
+	white-space: nowrap;
+}
+.zf-forma {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+/* Pie de tabla */
+.zf-tabla-pie {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px 18px;
+	flex-wrap: wrap;
+	padding: 12px 22px 14px;
+	border-top: 1px solid var(--zf-borde-suave);
+	color: var(--zf-mutado);
+	font-size: .74rem;
+	letter-spacing: .03em;
+}
+.zf-leyenda {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+}
+.zf-dot {
+	width: 9px;
+	height: 9px;
+	border-radius: 50%;
+	background: linear-gradient(150deg, #2fd46c, #15803d);
+	box-shadow: 0 0 8px rgba(34, 197, 94, .5);
+	flex: 0 0 auto;
+}
+.zf-leyenda-forma {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+.zf-leyenda-forma .zf-pill {
+	width: 17px;
+	height: 17px;
+	border-radius: 6px;
+	font-size: .56rem;
+}
+
+/* ======================= PARTIDOS ========================= */
+
+.zf-partido {
+	position: relative;
+	display: flex;
+	align-items: stretch;
+	gap: 16px;
+	background:
+		radial-gradient(120% 140% at 0% 0%, rgba(34, 197, 94, .05), transparent 45%),
+		var(--zf-panel);
+	border: 1px solid var(--zf-borde);
+	border-radius: var(--zf-radio);
+	padding: 15px 18px;
+	box-shadow: var(--zf-sombra);
+	transition: transform var(--zf-transicion), border-color var(--zf-transicion), box-shadow var(--zf-transicion);
+	animation: zf-in .5s ease backwards;
+}
+.zf-partido:hover {
+	transform: translateY(-3px);
+	border-color: rgba(34, 197, 94, .42);
+	box-shadow: 0 18px 40px rgba(2, 6, 16, .55), 0 4px 10px rgba(2, 6, 16, .4);
+}
+
+/* Bloque de fecha */
+.zf-partido-fecha {
+	flex: 0 0 auto;
+	align-self: center;
+	min-width: 64px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	background: linear-gradient(180deg, var(--zf-panel-2), rgba(24, 32, 48, .5));
+	border: 1px solid var(--zf-borde);
+	border-radius: var(--zf-radio-sm);
+	padding: 8px 10px 7px;
+	gap: 1px;
+	line-height: 1.2;
+}
+.zf-fecha-dow {
+	font-size: .62rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .12em;
+	color: var(--zf-acento);
+}
+.zf-fecha-num {
+	font-size: 1.35rem;
+	font-weight: 900;
+	color: var(--zf-texto);
+	line-height: 1.05;
+}
+.zf-fecha-mes {
+	font-size: .62rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .12em;
+	color: var(--zf-mutado);
+}
+.zf-fecha-hora {
+	margin-top: 5px;
+	padding: 2px 9px;
+	border-radius: 999px;
+	background: rgba(96, 165, 250, .12);
+	border: 1px solid rgba(96, 165, 250, .28);
+	color: #9ec9fe;
+	font-size: .72rem;
+	font-weight: 800;
+	white-space: nowrap;
+}
+
+/* Cuerpo central */
+.zf-partido-cuerpo {
+	flex: 1 1 auto;
+	display: grid;
+	gap: 10px;
+	min-width: 0;
+	align-content: center;
+}
+
+.zf-partido-fila {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+	align-items: center;
+	gap: 14px;
+}
+
+.zf-partido-equipo {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	min-width: 0;
+	font-weight: 700;
+	color: var(--zf-texto);
+	font-size: .98rem;
+}
+.zf-partido-equipo .zf-equipo-nombre {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	transition: color var(--zf-transicion);
+}
+.zf-partido-equipo-local { justify-content: flex-start; text-align: left; }
+.zf-partido-equipo-visita { justify-content: flex-end; text-align: right; flex-direction: row-reverse; }
+
+/* Ganador / perdedor */
+.zf-ganador .zf-equipo-nombre { color: #86efac; text-shadow: 0 0 18px rgba(34, 197, 94, .35); }
+.zf-perdedor .zf-equipo-nombre { color: var(--zf-mutado); }
+.zf-ganador .zf-crest { border-color: rgba(34, 197, 94, .55); box-shadow: 0 0 0 2px rgba(34, 197, 94, .18), inset 0 0 0 2px rgba(255, 255, 255, .03); }
+
+/* Centro: marcador o VS */
+.zf-partido-centro {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	flex: 0 0 auto;
+}
+.zf-marcador {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	padding: 7px 16px;
+	border-radius: 12px;
+	background: linear-gradient(180deg, var(--zf-panel-3), var(--zf-panel-2));
+	border: 1px solid var(--zf-borde);
+	font-size: 1.42rem;
+	font-weight: 900;
+	color: #fff;
+	line-height: 1;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), 0 6px 16px rgba(2, 6, 16, .4);
+}
+.zf-marcador b { font-weight: 900; }
+.zf-ganador-score {
+	color: #86efac;
+	text-shadow: 0 0 14px rgba(34, 197, 94, .4);
+}
+.zf-marcador-sep {
+	color: var(--zf-mutado);
+	font-weight: 400;
+	font-size: 1rem;
+}
+.zf-partido-tag {
+	font-size: .62rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .14em;
+	color: var(--zf-mutado);
+}
+
+.zf-vs {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 46px;
+	padding: 7px 14px;
+	border-radius: 12px;
+	background: linear-gradient(180deg, var(--zf-panel-3), var(--zf-panel-2));
+	border: 1px solid var(--zf-borde);
+	color: var(--zf-mutado);
+	font-size: .82rem;
+	font-weight: 900;
+	text-transform: uppercase;
+	letter-spacing: .1em;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05);
+}
+
+/* Fila de extras */
+.zf-partido-extras {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 6px 16px;
+	font-size: .82rem;
+	color: var(--zf-mutado);
+	padding-top: 9px;
+	border-top: 1px solid var(--zf-borde-suave);
+}
+.zf-extra {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	white-space: nowrap;
+}
+.zf-extra svg {
+	width: 13px;
+	height: 13px;
+	color: var(--zf-acento);
+	opacity: .85;
+	flex: 0 0 auto;
+}
+.zf-extra strong { color: var(--zf-texto); font-weight: 700; }
+
+/* ====================== Animaciones ====================== */
+
+@keyframes zf-in {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Entrada escalonada de listas */
+.zf-lista > *:nth-child(1) { animation-delay: .03s; }
+.zf-lista > *:nth-child(2) { animation-delay: .08s; }
+.zf-lista > *:nth-child(3) { animation-delay: .13s; }
+.zf-lista > *:nth-child(4) { animation-delay: .18s; }
+.zf-lista > *:nth-child(5) { animation-delay: .23s; }
+.zf-lista > *:nth-child(6) { animation-delay: .28s; }
+.zf-lista > *:nth-child(7) { animation-delay: .33s; }
+.zf-lista > *:nth-child(8) { animation-delay: .38s; }
+.zf-zonas > *:nth-child(2),
+.zf-tablas > *:nth-child(2) { animation-delay: .07s; }
+.zf-zonas > *:nth-child(3),
+.zf-tablas > *:nth-child(3) { animation-delay: .14s; }
+.zf-zonas > *:nth-child(4),
+.zf-tablas > *:nth-child(4) { animation-delay: .21s; }
+.zf-zonas > *:nth-child(n+5),
+.zf-tablas > *:nth-child(n+5) { animation-delay: .28s; }
+
+@media (prefers-reduced-motion: reduce) {
+	.zf-zona-card,
+	.zf-tabla-wrap,
+	.zf-partido {
+		animation: none !important;
+	}
+	.zf-zona-equipos li,
+	.zf-partido {
+		transition: none !important;
+	}
+	.zf-partido:hover {
+		transform: none;
+	}
+}
+
+/* ======================= Responsive ====================== */
+
+@media (max-width: 720px) {
+	.zf-tabla-head,
+	.zf-tabla-pie {
+		padding-inline: 16px;
+	}
+	table.zf-tabla th,
+	table.zf-tabla td {
+		padding: 10px 6px;
+	}
+	table.zf-tabla td.zf-col-equipo {
+		min-width: 150px;
+	}
+	/* Ocultamos GF/GC en pantallas angostas: DIF + PTS mantienen el resumen */
+	table.zf-tabla th.zf-col-gf,
+	table.zf-tabla td.zf-col-gf,
+	table.zf-tabla th.zf-col-gc,
+	table.zf-tabla td.zf-col-gc {
+		display: none;
+	}
+	table.zf-tabla th.zf-col-forma,
+	table.zf-tabla td.zf-col-forma {
+		min-width: 96px;
+	}
+}
+
+@media (max-width: 640px) {
+	.zf-zona-card {
+		padding: 16px 15px 18px;
+	}
+
+	/* Partido apilado tipo cartel */
+	.zf-partido {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 12px;
+		padding: 14px;
+	}
+	.zf-partido-fecha {
+		align-self: stretch;
+		flex-direction: row;
+		justify-content: center;
+		align-items: baseline;
+		gap: 8px;
+		padding: 7px 10px;
+	}
+	.zf-fecha-num { font-size: 1.1rem; }
+	.zf-fecha-hora { margin-top: 0; margin-left: auto; }
+
+	.zf-partido-fila {
+		grid-template-columns: 1fr;
+		gap: 10px;
+		justify-items: center;
+	}
+	.zf-partido-equipo,
+	.zf-partido-equipo-visita {
+		justify-content: center;
+		text-align: center;
+		flex-direction: row;
+		max-width: 100%;
+	}
+	.zf-partido-centro {
+		order: 2;
+		padding: 2px 0;
+	}
+	.zf-partido-equipo-local { order: 1; }
+	.zf-partido-equipo-visita { order: 3; }
+	.zf-marcador { font-size: 1.55rem; padding: 8px 20px; }
+
+	.zf-partido-extras {
+		gap: 5px 12px;
+		font-size: .78rem;
+	}
+}
