@@ -78,7 +78,12 @@ class ZF_Shortcodes {
 			echo '<ul class="zf-zona-equipos">';
 			if ( $equipos ) {
 				foreach ( $equipos as $equipo ) {
-					echo '<li>' . ZF_Helpers::render_avatar( $equipo->ID ) . '<span>' . esc_html( $equipo->post_title ) . '</span></li>'; // phpcs:ignore WordPress.Security.EscapeOutput
+					$url_perfil = add_query_arg( 'zf_equipo', (int) $equipo->ID );
+					echo '<li data-nombre="' . esc_attr( $equipo->post_title ) . '">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo '<a class="zf-equipo-link" href="' . esc_url( $url_perfil ) . '">';
+					echo ZF_Helpers::render_avatar( $equipo->ID ); // phpcs:ignore WordPress.Security.EscapeOutput
+					echo '<span>' . esc_html( $equipo->post_title ) . '</span>';
+					echo '</a></li>';
 				}
 			} else {
 				echo '<li class="zf-vacio">' . esc_html__( 'Sin equipos asignados.', 'zonas-partidos-futbol' ) . '</li>';

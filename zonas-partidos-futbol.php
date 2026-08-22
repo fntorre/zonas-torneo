@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Zonas y Partidos de Fútbol
  * Description: Agrupa los equipos de "Inscripciones Fútbol" en zonas, gestiona el fixture (partidos con local, visitante, lugar y horario), carga resultados y muestra tablas de posiciones en el frontend mediante shortcodes.
- * Version:     1.1.0
+ * Version:     1.2.0
  * Author:      Inscripciones Fútbol
  * License:     GPL-2.0-or-later
  * Text Domain: zonas-partidos-futbol
@@ -12,7 +12,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ZF_VERSION', '1.1.0' );
+define( 'ZF_VERSION', '1.2.0' );
 define( 'ZF_PLUGIN_FILE', __FILE__ );
 define( 'ZF_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ZF_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -22,6 +22,7 @@ require_once ZF_PLUGIN_DIR . 'includes/class-zf-helpers.php';
 require_once ZF_PLUGIN_DIR . 'includes/class-zf-admin.php';
 require_once ZF_PLUGIN_DIR . 'includes/class-zf-metaboxes.php';
 require_once ZF_PLUGIN_DIR . 'includes/class-zf-shortcodes.php';
+require_once ZF_PLUGIN_DIR . 'includes/class-zf-hub.php';
 
 /**
  * Arranque del plugin.
@@ -31,6 +32,7 @@ function zf_init() {
 	ZF_Admin::hooks();
 	ZF_Metaboxes::hooks();
 	ZF_Shortcodes::hooks();
+	ZF_Hub::hooks();
 
 	add_action( 'admin_notices', array( 'ZF_Admin', 'aviso_dependencia' ) );
 }

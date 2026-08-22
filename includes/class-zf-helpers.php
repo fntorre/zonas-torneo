@@ -193,6 +193,61 @@ class ZF_Helpers {
 	}
 
 	/**
+	 * Partidos en los que participa un equipo.
+	 *
+	 * @param int   $equipo_id ID del equipo.
+	 * @param array $args {
+	 *     estado: string. limite: int. orden: asc|desc por fecha.
+	 * }
+	 * @return WP_Post[]
+	 */
+	public static function partidos_de_equipo( $equipo_id, $args = array() ) {
+		$args = wp_parse_args(
+			$args,
+			array(
+				'estado' => '',
+				'limite' => 5,
+				'orden'  => 'desc',
+			)
+		);
+
+		// (local = equipo OR visitante = equipo) AND [estado].
+		$meta_query = array(
+			'relation' => 'AND',
+			array(
+				'relation' => 'OR',
+				array(
+					'key'   => '_zf_local',
+					'value' => (int) $equipo_id,
+				),
+				array(
+					'key'   => '_zf_visitante',
+					'value' => (int) $equipo_id,
+				),
+			),
+		);
+
+		if ( $args['estado'] ) {
+			$meta_query[] = array(
+				'key'   => '_zf_estado',
+				'value' => $args['estado'],
+			);
+		}
+
+		return get_posts(
+			array(
+				'post_type'      => ZF_Install::CPT_PARTIDO,
+				'post_status'    => 'publish',
+				'posts_per_page' => (int) $args['limite'],
+				'meta_key'       => '_zf_fecha',
+				'orderby'        => 'meta_value',
+				'order'          => 'desc' === $args['orden'] ? 'DESC' : 'ASC',
+				'meta_query'     => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- necesario por diseño.
+			)
+		);
+	}
+
+	/**
 	 * Datos de un partido como arreglo.
 	 *
 	 * @param WP_Post|int $post Post.

@@ -1,0 +1,276 @@
+/* =========================================================
+   Zonas y Partidos de Fútbol · Hub del torneo
+   Navegación, buscador de equipos y perfil de equipo.
+   ========================================================= */
+
+.zf-hub {
+	--zf-panel: #121722;
+	--zf-panel-2: #182030;
+	--zf-panel-3: #1f2940;
+	--zf-borde: #263149;
+	--zf-borde-suave: rgba(255, 255, 255, .07);
+	--zf-texto: #f5f8fd;
+	--zf-mutado: #93a1ba;
+	--zf-acento: #22c55e;
+	--zf-acento-suave: rgba(34, 197, 94, .14);
+	--zf-dorado: #fbbf24;
+
+	color-scheme: dark;
+	color: var(--zf-texto);
+	display: grid;
+	gap: 18px;
+	font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------ Marca -------------------------- */
+
+.zf-hub-marca {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 16px;
+	align-self: start;
+	border-radius: 999px;
+	background: linear-gradient(180deg, var(--zf-panel-3), var(--zf-panel-2));
+	border: 1px solid var(--zf-borde);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05);
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .12em;
+	font-size: .85rem;
+}
+.zf-hub-marca svg {
+	width: 18px;
+	height: 18px;
+	color: var(--zf-acento);
+}
+
+/* ---------------------- Navegación ----------------------- */
+
+.zf-hub-nav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 7px;
+	background: rgba(13, 17, 28, .75);
+	border: 1px solid var(--zf-borde);
+	border-radius: 16px;
+	backdrop-filter: blur(6px);
+}
+
+.zf-nav-item {
+	flex: 1 1 auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-width: 120px;
+	padding: 10px 18px;
+	border-radius: 11px;
+	border: 1px solid transparent;
+	color: var(--zf-mutado);
+	font-size: .88rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .07em;
+	text-decoration: none !important;
+	transition: color .18s ease, background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.zf-nav-item svg {
+	width: 16px;
+	height: 16px;
+	flex: 0 0 auto;
+}
+.zf-nav-item:hover {
+	color: var(--zf-texto);
+	background: rgba(255, 255, 255, .04);
+	transform: translateY(-1px);
+}
+.zf-nav-item.is-active {
+	background: linear-gradient(180deg, rgba(47, 212, 108, .22), rgba(21, 128, 61, .18));
+	border-color: rgba(34, 197, 94, .5);
+	color: #b7f7cd;
+	box-shadow: 0 4px 14px rgba(34, 197, 94, .22), inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+
+/* ----------------------- Buscador ------------------------ */
+
+.zf-buscador-wrap {
+	position: relative;
+	display: grid;
+	gap: 12px;
+	margin-bottom: 2px;
+}
+.zf-buscador {
+	width: 100%;
+	padding: 13px 18px 13px 44px;
+	border-radius: 14px;
+	border: 1px solid var(--zf-borde);
+	background: linear-gradient(180deg, var(--zf-panel-2), rgba(24, 32, 48, .55));
+	color: var(--zf-texto);
+	font-size: 1rem;
+	outline: none;
+	transition: border-color .18s ease, box-shadow .18s ease;
+	appearance: none;
+	-webkit-appearance: none;
+}
+.zf-buscador::placeholder { color: var(--zf-mutado); }
+.zf-buscador:focus-visible {
+	border-color: rgba(34, 197, 94, .55);
+	box-shadow: 0 0 0 3px rgba(34, 197, 94, .18);
+}
+.zf-buscador-icono {
+	position: absolute;
+	top: 15px;
+	left: 16px;
+	width: 17px;
+	height: 17px;
+	color: var(--zf-mutado);
+	pointer-events: none;
+}
+.zf-buscador-icono svg { width: 100%; height: 100%; }
+
+.zf-sin-resultados {
+	margin: 0;
+	padding: 20px;
+	border: 1px dashed var(--zf-borde);
+	border-radius: 14px;
+	color: var(--zf-mutado);
+	text-align: center;
+}
+
+/* -------------------- Perfil de equipo ------------------- */
+
+.zf-volver {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	align-self: start;
+	padding: 8px 16px;
+	border-radius: 999px;
+	background: var(--zf-panel-2);
+	border: 1px solid var(--zf-borde);
+	color: var(--zf-mutado) !important;
+	font-size: .82rem;
+	font-weight: 700;
+	text-decoration: none !important;
+	transition: color .18s ease, border-color .18s ease, transform .18s ease;
+}
+.zf-volver svg { width: 14px; height: 14px; }
+.zf-volver:hover {
+	color: var(--zf-texto) !important;
+	border-color: rgba(34, 197, 94, .45);
+	transform: translateX(-2px);
+}
+
+.zf-equipo-hero {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 14px;
+	padding: 30px 22px 26px;
+	text-align: center;
+	background:
+		radial-gradient(90% 130% at 50% 0%, rgba(34, 197, 94, .12), transparent 60%),
+		var(--zf-panel);
+	border: 1px solid var(--zf-borde);
+	border-radius: 18px;
+	box-shadow: 0 12px 32px rgba(2, 6, 16, .45);
+	animation: zf-in .5s ease backwards;
+}
+.zf-equipo-crest-grande .zf-crest-lg,
+.zf-equipo-hero .zf-crest {
+	width: 84px;
+	height: 84px;
+	border-radius: 22px;
+}
+.zf-equipo-crest-grande .zf-crest img { padding: 6px; }
+.zf-equipo-nombre-grande {
+	margin: 0;
+	font-size: 1.65rem;
+	font-weight: 900;
+	letter-spacing: .02em;
+	line-height: 1.15;
+}
+.zf-equipo-chips {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 8px;
+}
+.zf-chip {
+	padding: 5px 14px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, .05);
+	border: 1px solid var(--zf-borde-suave);
+	color: var(--zf-mutado);
+	font-size: .78rem;
+	font-weight: 800;
+	letter-spacing: .04em;
+}
+.zf-chip-pos {
+	background: var(--zf-acento-suave);
+	border-color: rgba(34, 197, 94, .35);
+	color: #86efac;
+}
+
+/* Secciones del perfil */
+.zf-perfil-seccion {
+	display: grid;
+	gap: 14px;
+	animation: zf-in .5s .08s ease backwards;
+}
+.zf-perfil-titulo {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0;
+	font-size: 1.02rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .09em;
+}
+.zf-perfil-titulo::before {
+	content: "";
+	width: 4px;
+	height: 18px;
+	border-radius: 3px;
+	background: linear-gradient(180deg, var(--zf-acento), #15803d);
+	flex: 0 0 auto;
+}
+.zf-perfil-seccion .zf-forma .zf-pill {
+	width: 30px;
+	height: 30px;
+	border-radius: 9px;
+	font-size: .85rem;
+}
+.zf-perfil-seccion .zf-forma .zf-pill-vacio {
+	width: 30px;
+	height: 30px;
+}
+
+/* ----------------------- Responsive ---------------------- */
+
+@media (max-width: 720px) {
+	.zf-hub-nav {
+		gap: 6px;
+		padding: 6px;
+	}
+	.zf-nav-item {
+		min-width: calc(50% - 6px);
+		padding: 9px 10px;
+		font-size: .78rem;
+	}
+	.zf-nav-item span {
+		font-size: .78rem;
+	}
+}
+
+@media (max-width: 480px) {
+	.zf-nav-item {
+		min-width: 100%;
+	}
+	.zf-equipo-nombre-grande {
+		font-size: 1.3rem;
+	}
+}
