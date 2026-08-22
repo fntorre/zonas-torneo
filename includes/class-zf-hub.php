@@ -26,6 +26,7 @@ class ZF_Hub {
 			'equipos'    => __( 'Equipos', 'zonas-partidos-futbol' ),
 			'proximos'   => __( 'Próximos', 'zonas-partidos-futbol' ),
 			'resultados' => __( 'Resultados', 'zonas-partidos-futbol' ),
+			'playoffs'   => __( 'Playoffs', 'zonas-partidos-futbol' ),
 		);
 	}
 
@@ -137,6 +138,10 @@ class ZF_Hub {
 			default:
 				echo ZF_Shortcodes::tabla(); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML ya escapado dentro.
 				break;
+
+			case 'playoffs':
+				echo ZF_Shortcodes::playoffs(); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML ya escapado dentro.
+				break;
 		}
 		echo '</section>';
 
@@ -156,6 +161,7 @@ class ZF_Hub {
 			'equipos'    => array( __CLASS__, 'icono_escudo' ),
 			'proximos'   => 'ZF_Helpers::icono_calendario',
 			'resultados' => array( __CLASS__, 'icono_check' ),
+			'playoffs'   => array( __CLASS__, 'icono_llave' ),
 		);
 
 		echo '<nav class="zf-hub-nav" aria-label="' . esc_attr__( 'Secciones del torneo', 'zonas-partidos-futbol' ) . '">';
@@ -335,5 +341,14 @@ class ZF_Hub {
 	 */
 	public static function icono_flecha() {
 		return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>';
+	}
+
+	/**
+	 * SVG de cuadro de eliminatorias para la pestaña playoffs.
+	 *
+	 * @return string
+	 */
+	public static function icono_llave() {
+		return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="8.5" y="14" width="7" height="7" rx="1.5"/><path d="M6.5 10v2.5h11V10"/><path d="M12 12.5V14"/></svg>';
 	}
 }

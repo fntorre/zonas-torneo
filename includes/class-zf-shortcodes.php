@@ -22,6 +22,7 @@ class ZF_Shortcodes {
 		add_shortcode( 'zf_tabla_posiciones', array( __CLASS__, 'tabla' ) );
 		add_shortcode( 'zf_proximos_partidos', array( __CLASS__, 'proximos' ) );
 		add_shortcode( 'zf_resultados', array( __CLASS__, 'resultados' ) );
+		add_shortcode( 'zf_playoffs', array( __CLASS__, 'playoffs' ) );
 	}
 
 	/**
@@ -231,6 +232,52 @@ class ZF_Shortcodes {
 		}
 		foreach ( $partidos as $partido ) {
 			echo ZF_Helpers::render_partido( $partido, $config['modo'] ); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML ya escapado dentro.
+		}
+		echo '</div>';
+		return ob_get_clean();
+	}
+
+	// ========================= [zf_playoffs] ================================.
+
+	/**
+	 * Cuadros de fase eliminatoria.
+	 *
+	 * @param array $atts llave: slug|ID (opcional; vacío = todas).
+	 * @return string
+	 */
+	public static function playoffs( $atts = array() ) {
+		self::css();
+		$atts = shortcode_atts(
+			array( 'llave' => '' ),
+			$atts,
+			'zf_playoffs'
+		);
+
+		$query = array(
+			'post_type'      => ZF_Install::CPT_LLAVE,
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'orderby'        => 'title',
+			'order'          => 'ASC',
+		);
+
+		if ( $atts['llave'] ) {
+			if ( is_numeric( $atts['llave'] ) ) {
+				$query['p'] = absint( $atts['llave'] );
+			} else {
+				$query['name'] = sanitize_title( $atts['llave'] );
+			}
+		}
+
+		$llaves = get_posts( $query );
+
+		ob_start();
+		echo '<div class="zf-tablas zf-llaves">';
+		if ( ! $llaves ) {
+			echo '<p class="zf-vacio">' . esc_html__( 'Todavía no hay llaves generadas.', 'zonas-partidos-futbol' ) . '</p>';
+		}
+		foreach ( $llaves as $llave ) {
+			echo ZF_Llaves::render_llave( $llave ); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML ya escapado dentro.
 		}
 		echo '</div>';
 		return ob_get_clean();

@@ -14,6 +14,7 @@ class ZF_Install {
 
 	const CPT_PARTIDO = 'zf_partido';
 	const TAX_ZONA    = 'zf_zona';
+	const CPT_LLAVE   = 'zf_llave';
 
 	/**
 	 * Hooks.
@@ -28,6 +29,7 @@ class ZF_Install {
 	public static function register() {
 		self::register_taxonomia();
 		self::register_partido();
+		self::register_llave();
 	}
 
 	/**
@@ -96,6 +98,34 @@ class ZF_Install {
 				'show_in_menu'    => true,
 				'menu_position'   => 27,
 				'menu_icon'       => 'dashicons-calendar-alt',
+				'supports'        => array( 'title' ),
+				'capability_type' => 'post',
+				'map_meta_cap'    => true,
+				'rewrite'         => false,
+			)
+		);
+	}
+
+	/**
+	 * CPT Llave (fase eliminatoria).
+	 */
+	private static function register_llave() {
+		$labels = array(
+			'name'          => __( 'Llaves', 'zonas-partidos-futbol' ),
+			'singular_name' => __( 'Llave', 'zonas-partidos-futbol' ),
+			'add_new'       => __( 'Nueva llave', 'zonas-partidos-futbol' ),
+			'add_new_item'  => __( 'Agregar llave nueva', 'zonas-partidos-futbol' ),
+			'edit_item'     => __( 'Editar llave', 'zonas-partidos-futbol' ),
+			'search_items'  => __( 'Buscar llaves', 'zonas-partidos-futbol' ),
+			'not_found'     => __( 'No hay llaves creadas todavía.', 'zonas-partidos-futbol' ),
+		);
+		register_post_type(
+			self::CPT_LLAVE,
+			array(
+				'labels'          => $labels,
+				'public'          => false,
+				'show_ui'         => true,
+				'show_in_menu'    => 'edit.php?post_type=' . self::CPT_PARTIDO,
 				'supports'        => array( 'title' ),
 				'capability_type' => 'post',
 				'map_meta_cap'    => true,

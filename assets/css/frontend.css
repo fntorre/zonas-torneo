@@ -710,6 +710,168 @@ table.zf-tabla td.zf-col-forma {
 	}
 }
 
+/* ==================== LLAVES / PLAYOFFS =================== */
+
+.zf-llave-wrap {
+	animation: zf-in .5s ease backwards;
+}
+.zf-llave-scroll {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+	padding: 18px;
+}
+.zf-llave-grid {
+	display: flex;
+	align-items: stretch;
+	gap: 34px;
+	min-width: max-content;
+}
+
+.zf-llave-ronda {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	gap: 16px;
+	min-width: 235px;
+	max-width: 235px;
+	flex: 1 1 auto;
+}
+.zf-llave-ronda-titulo {
+	margin: 0 0 2px;
+	font-size: .72rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .12em;
+	color: var(--zf-mutado);
+	text-align: center;
+	white-space: nowrap;
+}
+
+.zf-llave-partido {
+	background: linear-gradient(180deg, var(--zf-panel-2), rgba(24, 32, 48, .55));
+	border: 1px solid var(--zf-borde);
+	border-radius: var(--zf-radio-sm);
+	overflow: hidden;
+	box-shadow: 0 6px 18px rgba(2, 6, 16, .35);
+	transition: border-color var(--zf-transicion), transform var(--zf-transicion);
+}
+.zf-llave-partido:hover {
+	border-color: rgba(34, 197, 94, .45);
+	transform: translateY(-2px);
+}
+
+.zf-lp-fila {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	padding: 8px 12px;
+	min-width: 0;
+}
+.zf-lp-fila + .zf-lp-fila {
+	border-top: 1px solid var(--zf-borde-suave);
+}
+.zf-lp-fila .zf-crest {
+	width: 24px;
+	height: 24px;
+}
+.zf-lp-fila .zf-crest-txt {
+	font-size: .58rem;
+}
+.zf-lp-equipo {
+	flex: 1 1 auto;
+	min-width: 0;
+	font-size: .88rem;
+	font-weight: 700;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: var(--zf-texto);
+}
+.zf-lp-goles {
+	font-size: 1rem;
+	font-weight: 900;
+	color: #fff;
+	flex: 0 0 auto;
+}
+
+/* Resultado definido */
+.zf-llave-partido .zf-ganador .zf-lp-equipo,
+.zf-llave-partido .zf-ganador .zf-lp-goles { color: #86efac; }
+.zf-llave-partido .zf-ganador .zf-lp-equipo { text-shadow: 0 0 14px rgba(34, 197, 94, .35); }
+.zf-llave-partido .zf-perdedor .zf-lp-equipo,
+.zf-llave-partido .zf-perdedor .zf-lp-goles { color: var(--zf-mutado); }
+
+.zf-lp-placeholder {
+	font-size: .85rem;
+	font-style: italic;
+	color: var(--zf-mutado);
+}
+.zf-lp-pie {
+	padding: 5px 12px;
+	text-align: center;
+	font-size: .68rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .08em;
+	color: #fca5a5;
+	background: rgba(239, 68, 68, .12);
+	border-top: 1px solid rgba(239, 68, 68, .3);
+}
+
+/* Columna campeón */
+.zf-campeon-col {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	min-width: 190px;
+	align-self: center;
+}
+.zf-campeon-etiqueta {
+	font-size: .7rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .14em;
+	color: var(--zf-dorado);
+}
+.zf-campeon-card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	padding: 22px 26px;
+	border-radius: var(--zf-radio);
+	background:
+		radial-gradient(100% 100% at 50% 0%, rgba(251, 191, 36, .18), transparent 70%),
+		linear-gradient(180deg, var(--zf-panel-3), var(--zf-panel));
+	border: 1px solid rgba(251, 191, 36, .45);
+	box-shadow: 0 0 0 1px rgba(251, 191, 36, .15), 0 12px 30px rgba(2, 6, 16, .45);
+	text-align: center;
+	animation: zf-in .5s ease backwards;
+}
+.zf-campeon-card svg {
+	width: 26px;
+	height: 26px;
+	color: var(--zf-dorado);
+	filter: drop-shadow(0 0 10px rgba(251, 191, 36, .45));
+}
+.zf-campeon-card strong {
+	font-size: 1.02rem;
+	letter-spacing: .02em;
+}
+
+@media (max-width: 720px) {
+	.zf-llave-grid {
+		gap: 22px;
+		padding-bottom: 4px;
+	}
+	.zf-llave-ronda {
+		min-width: 205px;
+		max-width: 205px;
+	}
+}
+
 /* ======================= Responsive ====================== */
 
 @media (max-width: 720px) {
