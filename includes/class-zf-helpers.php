@@ -443,7 +443,7 @@ class ZF_Helpers {
 			echo '<th class="zf-col-' . esc_attr( $k ) . '">' . esc_html( $label ) . '</th>';
 		}
 		if ( $args['forma'] ) {
-			echo '<th class="zf-col-forma">' . esc_html__( 'Forma', 'zonas-partidos-futbol' ) . '</th>';
+			echo '<th class="zf-col-forma">' . esc_html__( 'Racha', 'zonas-partidos-futbol' ) . '</th>';
 		}
 		echo '</tr></thead><tbody>';
 
@@ -511,7 +511,7 @@ class ZF_Helpers {
 			'P' => array( 'zf-pill-p', __( 'Perdido', 'zonas-partidos-futbol' ) ),
 		);
 
-		$html    = '<span class="zf-forma" aria-label="' . esc_attr__( 'Forma reciente', 'zonas-partidos-futbol' ) . '">';
+		$html    = '<span class="zf-forma" aria-label="' . esc_attr__( 'Racha reciente', 'zonas-partidos-futbol' ) . '">';
 		$datos   = array_slice( array_values( (array) $resultados ), -5 );
 		$mostrar = max( 5, count( $datos ) );
 
