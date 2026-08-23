@@ -72,67 +72,105 @@ class ZF_Metaboxes {
 			return;
 		}
 		?>
-		<div class="zf-meta-grid">
-			<p>
-				<label for="zf_zona"><?php esc_html_e( 'Zona', 'zonas-partidos-futbol' ); ?></label>
-				<select name="zf_zona" id="zf_zona">
-					<option value=""><?php esc_html_e( '— Sin zona —', 'zonas-partidos-futbol' ); ?></option>
-					<?php foreach ( $zonas as $zona ) : ?>
-						<option value="<?php echo esc_attr( $zona->term_id ); ?>" <?php selected( has_term( $zona->term_id, ZF_Install::TAX_ZONA, $post ) ); ?>><?php echo esc_html( $zona->name ); ?></option>
-					<?php endforeach; ?>
-				</select>
-				<?php if ( ! $zonas ) : ?>
-					<span class="zf-meta-aviso"><?php esc_html_e( 'No hay zonas creadas: crealas en Campeonato → Zonas.', 'zonas-partidos-futbol' ); ?></span>
-				<?php endif; ?>
-			</p>
-			<p>
-				<label for="zf_local"><?php esc_html_e( 'Equipo local', 'zonas-partidos-futbol' ); ?> *</label>
-				<select name="zf_local" id="zf_local" required>
-					<option value=""><?php esc_html_e( '— Elegir equipo —', 'zonas-partidos-futbol' ); ?></option>
-					<?php foreach ( $equipos as $equipo ) : ?>
-						<option value="<?php echo esc_attr( $equipo->ID ); ?>" <?php selected( $local_id, $equipo->ID ); ?>><?php echo esc_html( $equipo->post_title ); ?></option>
-					<?php endforeach; ?>
-				</select>
-			</p>
-			<p>
-				<label for="zf_visitante"><?php esc_html_e( 'Equipo visitante', 'zonas-partidos-futbol' ); ?> *</label>
-				<select name="zf_visitante" id="zf_visitante" required>
-					<option value=""><?php esc_html_e( '— Elegir equipo —', 'zonas-partidos-futbol' ); ?></option>
-					<?php foreach ( $equipos as $equipo ) : ?>
-						<option value="<?php echo esc_attr( $equipo->ID ); ?>" <?php selected( $visitante_id, $equipo->ID ); ?>><?php echo esc_html( $equipo->post_title ); ?></option>
-					<?php endforeach; ?>
-				</select>
-			</p>
-			<p>
-				<label for="zf_lugar"><?php esc_html_e( 'Lugar / cancha', 'zonas-partidos-futbol' ); ?></label>
-				<input type="text" name="zf_lugar" id="zf_lugar" value="<?php echo esc_attr( $lugar ); ?>" />
-			</p>
-			<p>
-				<label for="zf_fecha"><?php esc_html_e( 'Fecha y hora', 'zonas-partidos-futbol' ); ?></label>
-				<input type="datetime-local" name="zf_fecha" id="zf_fecha" value="<?php echo esc_attr( $fecha_input ); ?>" />
-			</p>
-			<p>
-				<label for="zf_jornada"><?php esc_html_e( 'Jornada / fecha (número o nombre)', 'zonas-partidos-futbol' ); ?></label>
-				<input type="text" name="zf_jornada" id="zf_jornada" value="<?php echo esc_attr( $jornada ); ?>" placeholder="1, 2, 3…" />
-			</p>
-			<p>
-				<label for="zf_estado"><?php esc_html_e( 'Estado del partido', 'zonas-partidos-futbol' ); ?></label>
-				<select name="zf_estado" id="zf_estado">
-					<?php foreach ( ZF_Helpers::estados() as $clave => $etiqueta ) : ?>
-						<option value="<?php echo esc_attr( $clave ); ?>" <?php selected( $estado, $clave ); ?>><?php echo esc_html( $etiqueta ); ?></option>
-					<?php endforeach; ?>
-				</select>
-			</p>
-			<p>
-				<label for="zf_goles_local"><?php esc_html_e( 'Goles local', 'zonas-partidos-futbol' ); ?></label>
-				<input type="number" name="zf_goles_local" id="zf_goles_local" min="0" max="99" value="<?php echo esc_attr( $gl ); ?>" />
-			</p>
-			<p>
-				<label for="zf_goles_visitante"><?php esc_html_e( 'Goles visitante', 'zonas-partidos-futbol' ); ?></label>
-				<input type="number" name="zf_goles_visitante" id="zf_goles_visitante" min="0" max="99" value="<?php echo esc_attr( $gv ); ?>" />
-			</p>
+		<div class="zf-form">
+
+			<section class="zf-seccion zf-seccion--cruce">
+				<header class="zf-seccion-head">
+					<span class="zf-seccion-icono dashicons dashicons-shield" aria-hidden="true"></span>
+					<div class="zf-seccion-textos">
+						<h4><?php esc_html_e( 'Cruce', 'zonas-partidos-futbol' ); ?></h4>
+						<p><?php esc_html_e( 'Zona del torneo y equipos que se enfrentan.', 'zonas-partidos-futbol' ); ?></p>
+					</div>
+				</header>
+				<div class="zf-seccion-grid">
+					<p class="zf-campo zf-campo--completo">
+						<label for="zf_zona"><?php esc_html_e( 'Zona', 'zonas-partidos-futbol' ); ?></label>
+						<select name="zf_zona" id="zf_zona">
+							<option value=""><?php esc_html_e( '— Sin zona —', 'zonas-partidos-futbol' ); ?></option>
+							<?php foreach ( $zonas as $zona ) : ?>
+								<option value="<?php echo esc_attr( $zona->term_id ); ?>" <?php selected( has_term( $zona->term_id, ZF_Install::TAX_ZONA, $post ) ); ?>><?php echo esc_html( $zona->name ); ?></option>
+							<?php endforeach; ?>
+						</select>
+						<?php if ( ! $zonas ) : ?>
+							<span class="zf-campo-aviso"><?php esc_html_e( 'No hay zonas creadas: crealas en Campeonato → Zonas.', 'zonas-partidos-futbol' ); ?></span>
+						<?php endif; ?>
+					</p>
+					<p class="zf-campo">
+						<label for="zf_local"><?php esc_html_e( 'Equipo local', 'zonas-partidos-futbol' ); ?> *</label>
+						<select name="zf_local" id="zf_local" required>
+							<option value=""><?php esc_html_e( '— Elegir equipo —', 'zonas-partidos-futbol' ); ?></option>
+							<?php foreach ( $equipos as $equipo ) : ?>
+								<option value="<?php echo esc_attr( $equipo->ID ); ?>" <?php selected( $local_id, $equipo->ID ); ?>><?php echo esc_html( $equipo->post_title ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</p>
+					<p class="zf-campo">
+						<label for="zf_visitante"><?php esc_html_e( 'Equipo visitante', 'zonas-partidos-futbol' ); ?> *</label>
+						<select name="zf_visitante" id="zf_visitante" required>
+							<option value=""><?php esc_html_e( '— Elegir equipo —', 'zonas-partidos-futbol' ); ?></option>
+							<?php foreach ( $equipos as $equipo ) : ?>
+								<option value="<?php echo esc_attr( $equipo->ID ); ?>" <?php selected( $visitante_id, $equipo->ID ); ?>><?php echo esc_html( $equipo->post_title ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</p>
+				</div>
+			</section>
+			<section class="zf-seccion zf-seccion--agenda">
+				<header class="zf-seccion-head">
+					<span class="zf-seccion-icono dashicons dashicons-clock" aria-hidden="true"></span>
+					<div class="zf-seccion-textos">
+						<h4><?php esc_html_e( 'Agenda', 'zonas-partidos-futbol' ); ?></h4>
+						<p><?php esc_html_e( 'Cuándo y dónde se juega. La fecha ordena las listas del sitio.', 'zonas-partidos-futbol' ); ?></p>
+					</div>
+				</header>
+				<div class="zf-seccion-grid">
+					<p class="zf-campo">
+						<label for="zf_fecha"><?php esc_html_e( 'Fecha y hora', 'zonas-partidos-futbol' ); ?></label>
+						<input type="datetime-local" name="zf_fecha" id="zf_fecha" value="<?php echo esc_attr( $fecha_input ); ?>" />
+					</p>
+					<p class="zf-campo">
+						<label for="zf_lugar"><?php esc_html_e( 'Lugar / cancha', 'zonas-partidos-futbol' ); ?></label>
+						<input type="text" name="zf_lugar" id="zf_lugar" value="<?php echo esc_attr( $lugar ); ?>" />
+					</p>
+					<p class="zf-campo">
+						<label for="zf_jornada"><?php esc_html_e( 'Jornada / fecha (número o nombre)', 'zonas-partidos-futbol' ); ?></label>
+						<input type="text" name="zf_jornada" id="zf_jornada" value="<?php echo esc_attr( $jornada ); ?>" placeholder="1, 2, 3…" />
+					</p>
+				</div>
+			</section>
+			<section class="zf-seccion zf-seccion--resultado">
+				<header class="zf-seccion-head">
+					<span class="zf-seccion-icono dashicons dashicons-awards" aria-hidden="true"></span>
+					<div class="zf-seccion-textos">
+						<h4><?php esc_html_e( 'Resultado', 'zonas-partidos-futbol' ); ?></h4>
+						<p><?php esc_html_e( 'Marcá el estado y, si finalizó, cargá los goles.', 'zonas-partidos-futbol' ); ?></p>
+					</div>
+				</header>
+				<div class="zf-seccion-grid">
+					<p class="zf-campo zf-campo--completo">
+						<label for="zf_estado"><?php esc_html_e( 'Estado del partido', 'zonas-partidos-futbol' ); ?></label>
+						<select name="zf_estado" id="zf_estado" class="zf-select-estado">
+							<?php foreach ( ZF_Helpers::estados() as $clave => $etiqueta ) : ?>
+								<option value="<?php echo esc_attr( $clave ); ?>" <?php selected( $estado, $clave ); ?>><?php echo esc_html( $etiqueta ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</p>
+					<div class="zf-goles zf-campo--completo">
+						<p class="zf-campo">
+							<label for="zf_goles_local"><?php esc_html_e( 'Goles local', 'zonas-partidos-futbol' ); ?></label>
+							<input type="number" class="zf-input-gol" name="zf_goles_local" id="zf_goles_local" min="0" max="99" value="<?php echo esc_attr( $gl ); ?>" />
+						</p>
+						<span class="zf-goles-sep" aria-hidden="true">&ndash;</span>
+						<p class="zf-campo">
+							<label for="zf_goles_visitante"><?php esc_html_e( 'Goles visitante', 'zonas-partidos-futbol' ); ?></label>
+							<input type="number" class="zf-input-gol" name="zf_goles_visitante" id="zf_goles_visitante" min="0" max="99" value="<?php echo esc_attr( $gv ); ?>" />
+						</p>
+					</div>
+				</div>
+			</section>
+
+			<p class="zf-metabox-nota"><?php esc_html_e( 'Para cargar un resultado: marcá el estado "Finalizado" y completá los goles. En partidos de una llave, el ganador avanza automáticamente al cruce siguiente.', 'zonas-partidos-futbol' ); ?></p>
 		</div>
-		<p class="zf-metabox-nota"><?php esc_html_e( 'Para cargar un resultado: marcá el estado "Finalizado" y completá los goles.', 'zonas-partidos-futbol' ); ?></p>
 		<?php
 	}
 
