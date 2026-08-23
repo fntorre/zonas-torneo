@@ -82,9 +82,11 @@ class ZF_Admin {
 			echo '</div>';
 			return;
 		}
+		echo '<div class="zf-tablas">';
 		foreach ( $zonas as $zona ) {
 			echo ZF_Helpers::render_tabla( $zona ); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML ya escapado dentro.
 		}
+		echo '</div>';
 		echo '</div>';
 	}
 

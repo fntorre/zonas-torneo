@@ -10,7 +10,9 @@
 
 .zf-zonas,
 .zf-tablas,
-.zf-lista {
+.zf-lista,
+.zf-tabla-wrap,
+.zf-llave-wrap {
 	--zf-bg: #0b0e14;
 	--zf-panel: #121722;
 	--zf-panel-2: #182030;
