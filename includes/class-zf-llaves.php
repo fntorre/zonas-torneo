@@ -513,7 +513,8 @@ class ZF_Llaves {
 	 * @return string
 	 */
 	public static function etiqueta_ronda( $size, $ronda ) {
-		$restantes = max( 1, (int) $size >> (int) $ronda );
+		// Equipos que quedan DESPUÉS de la ronda: 8 equipos → Cuartos → Semis → Final.
+		$restantes = max( 1, (int) $size >> ( (int) $ronda + 1 ) );
 		$mapa      = array(
 			1   => __( 'Final', 'zonas-partidos-futbol' ),
 			2   => __( 'Semifinales', 'zonas-partidos-futbol' ),
@@ -555,22 +556,31 @@ class ZF_Llaves {
 		$agrupado = self::partidos_de_llave( $llave->ID );
 		$campeon  = (int) get_post_meta( $llave->ID, '_zf_campeon', true );
 
-		echo '<div class="zf-llave-scroll"><div class="zf-llave-grid">';
+		echo '<div class="zf-llave-scroll"><div class="zf-llave-grid zf-llave-espejo">';
 
-		$prev = array();
-		for ( $r = 0; $r < $rondas; $r++ ) {
+		// Lado izquierdo: primera mitad de cada ronda previa a la final.
+		for ( $r = 0; $r < $rondas - 1; $r++ ) {
 			$cruces = $size >> ( $r + 1 );
-			echo '<div class="zf-llave-ronda">';
-			echo '<h4 class="zf-llave-ronda-titulo">' . esc_html( self::etiqueta_ronda( $size, $r ) ) . '</h4>';
+			$mitad  = (int) ( $cruces / 2 );
+			$prev   = ( $r > 0 && isset( $agrupado[ $r - 1 ] ) ) ? $agrupado[ $r - 1 ] : array();
 
-			for ( $j = 0; $j < $cruces; $j++ ) {
+			echo '<div class="zf-llave-ronda zf-lado-izq">';
+			echo '<h4 class="zf-llave-ronda-titulo">' . esc_html( self::etiqueta_ronda( $size, $r ) ) . '</h4>';
+			for ( $j = 0; $j < $mitad; $j++ ) {
 				$partido = isset( $agrupado[ $r ][ $j ] ) ? $agrupado[ $r ][ $j ] : null;
 				echo self::render_partido_llave( $partido, $r, $j, $prev, $total ); // phpcs:ignore WordPress.Security.EscapeOutput -- escapado dentro.
 			}
 			echo '</div>';
-
-			$prev = isset( $agrupado[ $r ] ) ? $agrupado[ $r ] : array();
 		}
+
+		// Centro: la final y el campeón.
+		$r_final = $rondas - 1;
+		$prev_f  = isset( $agrupado[ $r_final - 1 ] ) ? $agrupado[ $r_final - 1 ] : array();
+
+		echo '<div class="zf-llave-ronda zf-llave-centro">';
+		echo '<h4 class="zf-llave-ronda-titulo zf-titulo-final">' . esc_html( self::etiqueta_ronda( $size, $r_final ) ) . '</h4>';
+		$partido_final = isset( $agrupado[ $r_final ][0] ) ? $agrupado[ $r_final ][0] : null;
+		echo self::render_partido_llave( $partido_final, $r_final, 0, $prev_f, $total ); // phpcs:ignore WordPress.Security.EscapeOutput -- escapado dentro.
 
 		if ( $campeon ) {
 			echo '<div class="zf-campeon-col">';
@@ -580,6 +590,22 @@ class ZF_Llaves {
 			echo ZF_Helpers::render_avatar( $campeon, 'lg' ); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML ya escapado dentro.
 			echo '<strong>' . esc_html( ZF_Helpers::nombre_equipo( $campeon ) ) . '</strong>';
 			echo '</div></div>';
+		}
+		echo '</div>';
+
+		// Lado derecho: segunda mitad de cada ronda, de la semifinal hacia afuera.
+		for ( $r = $rondas - 2; $r >= 0; $r-- ) {
+			$cruces = $size >> ( $r + 1 );
+			$mitad  = (int) ( $cruces / 2 );
+			$prev   = ( $r > 0 && isset( $agrupado[ $r - 1 ] ) ) ? $agrupado[ $r - 1 ] : array();
+
+			echo '<div class="zf-llave-ronda zf-lado-der">';
+			echo '<h4 class="zf-llave-ronda-titulo">' . esc_html( self::etiqueta_ronda( $size, $r ) ) . '</h4>';
+			for ( $j = $mitad; $j < $cruces; $j++ ) {
+				$partido = isset( $agrupado[ $r ][ $j ] ) ? $agrupado[ $r ][ $j ] : null;
+				echo self::render_partido_llave( $partido, $r, $j, $prev, $total ); // phpcs:ignore WordPress.Security.EscapeOutput -- escapado dentro.
+			}
+			echo '</div>';
 		}
 
 		echo '</div></div></section>';

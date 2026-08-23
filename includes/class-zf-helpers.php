@@ -498,11 +498,49 @@ class ZF_Helpers {
 	}
 
 	/**
+	 * Cantidad de clasificados de una zona según la configuración de las llaves.
+	 * Si ninguna llave incluye la zona, cae al filtro global.
+	 *
+	 * @param int $term_id ID de la zona.
+	 * @return int
+	 */
+	public static function clasificados_de_zona( $term_id ) {
+		static $cache = array();
+		if ( isset( $cache[ $term_id ] ) ) {
+			return $cache[ $term_id ];
+		}
+
+		$n_max   = 0;
+		$llaves  = get_posts(
+			array(
+				'post_type'      => ZF_Install::CPT_LLAVE,
+				'post_status'    => array( 'publish', 'draft', 'pending', 'future', 'private' ),
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+				'meta_key'       => '_zf_zonas',
+			)
+		);
+		foreach ( $llaves as $llave_id ) {
+			$zonas = get_post_meta( (int) $llave_id, '_zf_zonas', true );
+			if ( ! is_array( $zonas ) || ! in_array( (int) $term_id, array_map( 'intval', $zonas ), true ) ) {
+				continue;
+			}
+			$n = (int) get_post_meta( (int) $llave_id, '_zf_clasificados', true );
+			if ( $n > $n_max ) {
+				$n_max = $n;
+			}
+		}
+
+		$cache[ $term_id ] = $n_max > 0 ? $n_max : max( 0, (int) apply_filters( 'zf_clasificados_por_zona', 2 ) );
+		return $cache[ $term_id ];
+	}
+
+	/**
 	 * Tabla de posiciones en HTML.
 	 *
 	 * @param WP_Term $term Zona.
 	 * @param array   $args {
-	 *     clasificados: int puestos destacados (0 desactiva). forma: bool mostrar columna.
+	 *     clasificados: int puestos destacados ('' = automático según la llave). forma: bool mostrar columna.
 	 * }
 	 * @return string
 	 */
@@ -510,10 +548,14 @@ class ZF_Helpers {
 		$args = wp_parse_args(
 			$args,
 			array(
-				'clasificados' => (int) apply_filters( 'zf_clasificados_por_zona', 2 ),
+				'clasificados' => '',
 				'forma'        => true,
 			)
 		);
+		if ( '' === $args['clasificados'] || null === $args['clasificados'] ) {
+			// Automático: toma el valor configurado en la llave que clasifica esta zona.
+			$args['clasificados'] = self::clasificados_de_zona( $term->term_id );
+		}
 		$args['clasificados'] = max( 0, (int) $args['clasificados'] );
 
 		$filas = self::tabla_zona( $term );

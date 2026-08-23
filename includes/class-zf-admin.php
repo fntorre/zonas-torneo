@@ -254,7 +254,7 @@ class ZF_Admin {
 					</div>
 					<div class="zf-sc-item">
 						<code>[zf_tabla_posiciones zona="zona-a"]</code>
-						<p><?php esc_html_e( 'Tabla(s) de posiciones. Atributos: zona (slug o ID), clasificados (resalta los primeros N) y forma (oculta la racha con forma="0").', 'zonas-partidos-futbol' ); ?></p>
+						<p><?php esc_html_e( 'Tabla(s) de posiciones. Atributos: zona (slug o ID), clasificados (resalta los primeros N; si no se indica, usa el valor de la llave) y forma (oculta la racha con forma="0").', 'zonas-partidos-futbol' ); ?></p>
 					</div>
 					<div class="zf-sc-item">
 						<code>[zf_proximos_partidos limite="8"]</code>
