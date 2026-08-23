@@ -495,23 +495,14 @@ class ZF_Llaves {
 	}
 
 	/**
-	 * Ganador de un partido (0 si no finalizó o empató).
+	 * Ganador de un partido (0 si no finalizó o empató sin penales).
+	 * Un empate definido por penales tiene ganador y avanza de ronda.
 	 *
 	 * @param WP_Post|int $partido Partido.
 	 * @return int ID de equipo o 0.
 	 */
 	public static function ganador_de( $partido ) {
-		$d = ZF_Helpers::datos_partido( $partido );
-		if ( ! $d || ZF_Helpers::ESTADO_FINALIZADO !== $d['estado'] ) {
-			return 0;
-		}
-		if ( $d['gl'] > $d['gv'] ) {
-			return (int) $d['local'];
-		}
-		if ( $d['gv'] > $d['gl'] ) {
-			return (int) $d['visitante'];
-		}
-		return 0;
+		return ZF_Helpers::ganador_de_datos( ZF_Helpers::datos_partido( $partido ) );
 	}
 
 	/**
@@ -644,6 +635,15 @@ class ZF_Llaves {
 		$extra = '';
 		if ( ZF_Helpers::ESTADO_SUSPENDIDO === $d['estado'] ) {
 			$extra = '<div class="zf-lp-pie">' . esc_html( ZF_Helpers::estado_label( $d['estado'] ) ) . '</div>';
+		} elseif ( ZF_Helpers::definido_por_penales( $d ) ) {
+			$extra = '<div class="zf-lp-pie zf-lp-pen">' . esc_html(
+				sprintf(
+					/* translators: 1: penales del local. 2: penales del visitante. */
+					__( 'Penales %1$d–%2$d', 'zonas-partidos-futbol' ),
+					$d['pl'],
+					$d['pv']
+				)
+			) . '</div>';
 		}
 
 		return '<div class="zf-llave-partido">' . implode( '', $lados ) . $extra . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- contenido escapado arriba.

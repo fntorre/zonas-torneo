@@ -268,7 +268,46 @@ class ZF_Helpers {
 			'estado'    => (string) get_post_meta( $post->ID, '_zf_estado', true ),
 			'gl'        => (int) get_post_meta( $post->ID, '_zf_goles_local', true ),
 			'gv'        => (int) get_post_meta( $post->ID, '_zf_goles_visitante', true ),
+			'pl'        => (int) get_post_meta( $post->ID, '_zf_penales_local', true ),
+			'pv'        => (int) get_post_meta( $post->ID, '_zf_penales_visitante', true ),
 		);
+	}
+
+	/**
+	 * ¿Finalizó empatado y se definió por penales?
+	 *
+	 * @param array|null $d Datos de datos_partido().
+	 * @return bool
+	 */
+	public static function definido_por_penales( $d ) {
+		return is_array( $d )
+			&& self::ESTADO_FINALIZADO === $d['estado']
+			&& isset( $d['gl'], $d['gv'], $d['pl'], $d['pv'] )
+			&& $d['gl'] === $d['gv']
+			&& $d['pl'] !== $d['pv'];
+	}
+
+	/**
+	 * Ganador de un partido según datos ya cargados (0 si no hay).
+	 * Considera la definición por penales en los empates.
+	 *
+	 * @param array|null $d Datos de datos_partido().
+	 * @return int ID de equipo o 0.
+	 */
+	public static function ganador_de_datos( $d ) {
+		if ( ! is_array( $d ) || self::ESTADO_FINALIZADO !== $d['estado'] ) {
+			return 0;
+		}
+		if ( $d['gl'] > $d['gv'] ) {
+			return (int) $d['local'];
+		}
+		if ( $d['gv'] > $d['gl'] ) {
+			return (int) $d['visitante'];
+		}
+		if ( self::definido_por_penales( $d ) ) {
+			return $d['pl'] > $d['pv'] ? (int) $d['local'] : (int) $d['visitante'];
+		}
+		return 0;
 	}
 
 	/**
@@ -604,8 +643,9 @@ class ZF_Helpers {
 		}
 
 		$es_resultado = ( 'resultado' === $modo || self::ESTADO_FINALIZADO === $d['estado'] );
+		$por_penales  = self::definido_por_penales( $d );
 
-		// Ganador / perdedor solo con resultado cargado.
+		// Ganador / perdedor solo con resultado cargado (los penales definen empates).
 		$clase_local   = '';
 		$clase_visita  = '';
 		$puntua_local  = '';
@@ -617,9 +657,21 @@ class ZF_Helpers {
 			} elseif ( $d['gl'] < $d['gv'] ) {
 				$clase_local  = ' zf-perdedor';
 				$clase_visita = ' zf-ganador';
+			} elseif ( $por_penales ) {
+				if ( $d['pl'] > $d['pv'] ) {
+					$clase_local  = ' zf-ganador';
+					$clase_visita = ' zf-perdedor';
+					$puntua_local = ' zf-ganador-score';
+				} else {
+					$clase_local   = ' zf-perdedor';
+					$clase_visita  = ' zf-ganador';
+					$puntua_visita = ' zf-ganador-score';
+				}
 			}
-			$puntua_local  = $d['gl'] > $d['gv'] ? ' zf-ganador-score' : '';
-			$puntua_visita = $d['gv'] > $d['gl'] ? ' zf-ganador-score' : '';
+			if ( '' === $puntua_local && '' === $puntua_visita ) {
+				$puntua_local  = $d['gl'] > $d['gv'] ? ' zf-ganador-score' : '';
+				$puntua_visita = $d['gv'] > $d['gl'] ? ' zf-ganador-score' : '';
+			}
 		}
 
 		ob_start();
@@ -654,7 +706,7 @@ class ZF_Helpers {
 			echo '<span class="zf-marcador-sep">&ndash;</span>';
 			echo '<b class="' . esc_attr( ltrim( $puntua_visita, ' ' ) ) . '">' . esc_html( $d['gv'] ) . '</b>';
 			echo '</div>';
-			echo '<span class="zf-partido-tag">' . esc_html__( 'Final', 'zonas-partidos-futbol' ) . '</span>';
+			echo '<span class="zf-partido-tag">' . esc_html( $por_penales ? __( 'Definido por penales', 'zonas-partidos-futbol' ) : __( 'Final', 'zonas-partidos-futbol' ) ) . '</span>';
 		} else {
 			echo '<span class="zf-vs">' . esc_html__( 'VS', 'zonas-partidos-futbol' ) . '</span>';
 		}
@@ -668,8 +720,16 @@ class ZF_Helpers {
 
 		echo '</div>'; // zf-partido-fila.
 
-		// Extras: lugar · jornada · estado.
+		// Extras: lugar · jornada · penales · estado.
 		$extras = array();
+		if ( $por_penales ) {
+			$extras[] = '<span class="zf-extra zf-extra-penales">' . self::icono_penal() . sprintf(
+				/* translators: 1: penales del local. 2: penales del visitante. */
+				esc_html__( 'Penales %1$d–%2$d', 'zonas-partidos-futbol' ),
+				'<strong>' . esc_html( $d['pl'] ) . '</strong>',
+				'<strong>' . esc_html( $d['pv'] ) . '</strong>'
+			) . '</span>';
+		}
 		if ( $d['lugar'] ) {
 			$extras[] = '<span class="zf-extra zf-lugar">' . self::icono_pin() . esc_html( $d['lugar'] ) . '</span>';
 		}
@@ -701,6 +761,15 @@ class ZF_Helpers {
 	 */
 	public static function icono_pin() {
 		return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+	}
+
+	/**
+	 * SVG de punto de penal (pelota en el punto).
+	 *
+	 * @return string
+	 */
+	public static function icono_penal() {
+		return '<svg class="zf-icono-penal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5" fill="currentColor" stroke="none"/></svg>';
 	}
 
 	/**

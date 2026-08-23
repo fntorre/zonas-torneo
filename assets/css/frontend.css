@@ -663,6 +663,22 @@ table.zf-tabla td.zf-col-forma {
 	flex: 0 0 auto;
 }
 .zf-extra strong { color: var(--zf-texto); font-weight: 700; }
+.zf-extra-penales {
+	color: var(--zf-dorado);
+	background: rgba(251, 191, 36, .1);
+	border: 1px solid rgba(251, 191, 36, .3);
+	padding: 3px 10px;
+	border-radius: 999px;
+	font-size: .72rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: .05em;
+}
+.zf-extra-penales svg {
+	color: inherit;
+	opacity: 1;
+}
+.zf-extra-penales strong { color: inherit; }
 
 /* ====================== Animaciones ====================== */
 
@@ -816,6 +832,11 @@ table.zf-tabla td.zf-col-forma {
 	color: #fca5a5;
 	background: rgba(239, 68, 68, .12);
 	border-top: 1px solid rgba(239, 68, 68, .3);
+}
+.zf-lp-pen {
+	color: var(--zf-dorado);
+	background: rgba(251, 191, 36, .1);
+	border-top: 1px solid rgba(251, 191, 36, .3);
 }
 
 /* Columna campeón */

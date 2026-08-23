@@ -51,6 +51,8 @@ class ZF_Metaboxes {
 		$estado       = $d && $d['estado'] ? $d['estado'] : ZF_Helpers::ESTADO_PROGRAMADO;
 		$gl           = $d ? $d['gl'] : 0;
 		$gv           = $d ? $d['gv'] : 0;
+		$pl           = $d ? $d['pl'] : 0;
+		$pv           = $d ? $d['pv'] : 0;
 
 		// Fecha en formato datetime-local (horario del sitio).
 		$fecha_input = '';
@@ -166,10 +168,28 @@ class ZF_Metaboxes {
 							<input type="number" class="zf-input-gol" name="zf_goles_visitante" id="zf_goles_visitante" min="0" max="99" value="<?php echo esc_attr( $gv ); ?>" />
 						</p>
 					</div>
+					<div class="zf-penales zf-campo--completo">
+						<div class="zf-penales-titulo">
+							<?php echo wp_kses_post( ZF_Helpers::icono_penal() ); ?>
+							<strong><?php esc_html_e( 'Definición por penales', 'zonas-partidos-futbol' ); ?></strong>
+							<em><?php esc_html_e( 'completar solo si terminó empatado y se definió desde los doce pasos.', 'zonas-partidos-futbol' ); ?></em>
+						</div>
+						<div class="zf-penales-campos">
+							<p class="zf-campo">
+								<label for="zf_penales_local"><?php esc_html_e( 'Penales local', 'zonas-partidos-futbol' ); ?></label>
+								<input type="number" class="zf-input-gol zf-input-gol--penal" name="zf_penales_local" id="zf_penales_local" min="0" max="99" value="<?php echo esc_attr( $pl ); ?>" />
+							</p>
+							<span class="zf-goles-sep" aria-hidden="true">&ndash;</span>
+							<p class="zf-campo">
+								<label for="zf_penales_visitante"><?php esc_html_e( 'Penales visitante', 'zonas-partidos-futbol' ); ?></label>
+								<input type="number" class="zf-input-gol zf-input-gol--penal" name="zf_penales_visitante" id="zf_penales_visitante" min="0" max="99" value="<?php echo esc_attr( $pv ); ?>" />
+							</p>
+						</div>
+					</div>
 				</div>
 			</section>
 
-			<p class="zf-metabox-nota"><?php esc_html_e( 'Para cargar un resultado: marcá el estado "Finalizado" y completá los goles. En partidos de una llave, el ganador avanza automáticamente al cruce siguiente.', 'zonas-partidos-futbol' ); ?></p>
+			<p class="zf-metabox-nota"><?php esc_html_e( 'Para cargar un resultado: marcá el estado "Finalizado" y completá los goles. Si terminó empatado, cargá también los penales y el ganador se define solo. En partidos de una llave, avanza automáticamente al cruce siguiente.', 'zonas-partidos-futbol' ); ?></p>
 		</div>
 		<?php
 	}
@@ -199,6 +219,8 @@ class ZF_Metaboxes {
 		$estado       = isset( $_POST['zf_estado'] ) ? sanitize_key( wp_unslash( $_POST['zf_estado'] ) ) : ZF_Helpers::ESTADO_PROGRAMADO;
 		$gl           = isset( $_POST['zf_goles_local'] ) ? absint( $_POST['zf_goles_local'] ) : 0;
 		$gv           = isset( $_POST['zf_goles_visitante'] ) ? absint( $_POST['zf_goles_visitante'] ) : 0;
+		$pl           = isset( $_POST['zf_penales_local'] ) ? absint( $_POST['zf_penales_local'] ) : 0;
+		$pv           = isset( $_POST['zf_penales_visitante'] ) ? absint( $_POST['zf_penales_visitante'] ) : 0;
 
 		if ( ! in_array( $estado, array_keys( ZF_Helpers::estados() ), true ) ) {
 			$estado = ZF_Helpers::ESTADO_PROGRAMADO;
@@ -213,6 +235,20 @@ class ZF_Metaboxes {
 			set_transient( 'zf_error_' . $post_id, __( 'El local y el visitante no pueden ser el mismo equipo.', 'zonas-partidos-futbol' ), 60 );
 			return;
 		}
+		if ( ZF_Helpers::ESTADO_FINALIZADO === $estado && $gl === $gv && $pl === $pv && ( $pl || $pv ) ) {
+			set_transient(
+				'zf_error_' . $post_id,
+				__( 'El partido terminó empatado y los penales tampoco pueden quedar iguales: cargá una diferencia para definir al ganador.', 'zonas-partidos-futbol' ),
+				60
+			);
+			return;
+		}
+
+		// Los penales solo aplican a partidos finalizados que empataron en los 90'.
+		if ( ZF_Helpers::ESTADO_FINALIZADO !== $estado || $gl !== $gv || $pl === $pv ) {
+			$pl = 0;
+			$pv = 0;
+		}
 
 		update_post_meta( $post_id, '_zf_local', $local_id );
 		update_post_meta( $post_id, '_zf_visitante', $visitante_id );
@@ -221,6 +257,8 @@ class ZF_Metaboxes {
 		update_post_meta( $post_id, '_zf_estado', $estado );
 		update_post_meta( $post_id, '_zf_goles_local', $gl );
 		update_post_meta( $post_id, '_zf_goles_visitante', $gv );
+		update_post_meta( $post_id, '_zf_penales_local', $pl );
+		update_post_meta( $post_id, '_zf_penales_visitante', $pv );
 
 		// Fecha/hora: se guarda en GMT para ordenar y mostrar correctamente.
 		$fecha_input = isset( $_POST['zf_fecha'] ) ? sanitize_text_field( wp_unslash( $_POST['zf_fecha'] ) ) : '';

@@ -347,6 +347,16 @@ class ZF_Admin {
 					echo '<strong class="zf-celda-marcador">' . esc_html( $d['gl'] . ' - ' . $d['gv'] ) . '</strong> ';
 				}
 				echo '<span class="zf-badge zf-badge-' . esc_attr( $d['estado'] ) . '">' . esc_html( ZF_Helpers::estado_label( $d['estado'] ) ) . '</span>';
+				if ( ZF_Helpers::definido_por_penales( $d ) ) {
+					echo ' <span class="zf-ronda-mini" title="' . esc_attr__( 'Definido por penales', 'zonas-partidos-futbol' ) . '">' . esc_html(
+						sprintf(
+							/* translators: 1: penales del local. 2: penales del visitante. */
+							__( 'Pen. %1$d–%2$d', 'zonas-partidos-futbol' ),
+							$d['pl'],
+							$d['pv']
+						)
+					) . '</span>';
+				}
 				$ronda = (int) get_post_meta( $post_id, '_zf_ronda', true );
 				if ( get_post_meta( $post_id, '_zf_llave', true ) ) {
 					$llave_id  = (int) get_post_meta( $post_id, '_zf_llave', true );
