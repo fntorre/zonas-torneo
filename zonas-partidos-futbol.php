@@ -3,7 +3,7 @@
  * Plugin Name: Zonas y Partidos de Fútbol
  * Description: Agrupa los equipos de "Inscripciones Fútbol" en zonas, gestiona el fixture (partidos con local, visitante, lugar y horario), carga resultados y muestra tablas de posiciones en el frontend mediante shortcodes.
  * Version:     1.6.1
- * Author:      Inscripciones Fútbol
+ * Author:      Nicolás Torre
  * License:     GPL-2.0-or-later
  * Text Domain: zonas-partidos-futbol
  *
