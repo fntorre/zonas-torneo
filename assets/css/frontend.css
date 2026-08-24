@@ -621,6 +621,28 @@ table.zf-tabla td.zf-col-forma {
 	letter-spacing: .14em;
 	color: var(--zf-mutado);
 }
+.zf-penales-linea {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 3px 10px;
+	border-radius: 999px;
+	font-size: .66rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .08em;
+	white-space: nowrap;
+	color: var(--zf-dorado);
+	background: rgba(251, 191, 36, .12);
+	border: 1px solid rgba(251, 191, 36, .32);
+}
+.zf-penales-linea svg {
+	width: 11px;
+	height: 11px;
+}
+.zf-penales-linea strong {
+	font-size: .78rem;
+}
 
 .zf-vs {
 	display: inline-flex;
@@ -665,22 +687,6 @@ table.zf-tabla td.zf-col-forma {
 	flex: 0 0 auto;
 }
 .zf-extra strong { color: var(--zf-texto); font-weight: 700; }
-.zf-extra-penales {
-	color: var(--zf-dorado);
-	background: rgba(251, 191, 36, .1);
-	border: 1px solid rgba(251, 191, 36, .3);
-	padding: 3px 10px;
-	border-radius: 999px;
-	font-size: .72rem;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: .05em;
-}
-.zf-extra-penales svg {
-	color: inherit;
-	opacity: 1;
-}
-.zf-extra-penales strong { color: inherit; }
 
 /* ====================== Animaciones ====================== */
 

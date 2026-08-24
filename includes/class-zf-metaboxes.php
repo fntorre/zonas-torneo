@@ -235,20 +235,9 @@ class ZF_Metaboxes {
 			set_transient( 'zf_error_' . $post_id, __( 'El local y el visitante no pueden ser el mismo equipo.', 'zonas-partidos-futbol' ), 60 );
 			return;
 		}
-		if ( ZF_Helpers::ESTADO_FINALIZADO === $estado && $gl === $gv && $pl === $pv && ( $pl || $pv ) ) {
-			set_transient(
-				'zf_error_' . $post_id,
-				__( 'El partido terminó empatado y los penales tampoco pueden quedar iguales: cargá una diferencia para definir al ganador.', 'zonas-partidos-futbol' ),
-				60
-			);
-			return;
-		}
-
-		// Los penales solo aplican a partidos finalizados que empataron en los 90'.
-		if ( ZF_Helpers::ESTADO_FINALIZADO !== $estado || $gl !== $gv || $pl === $pv ) {
-			$pl = 0;
-			$pv = 0;
-		}
+		// Los penales se guardan siempre tal cual se cargan; su efecto se evalúa
+		// al leer los datos (solo definen ganador si finalizó empatado).
+		$empate_finalizado = ZF_Helpers::ESTADO_FINALIZADO === $estado && $gl === $gv;
 
 		update_post_meta( $post_id, '_zf_local', $local_id );
 		update_post_meta( $post_id, '_zf_visitante', $visitante_id );
@@ -257,8 +246,19 @@ class ZF_Metaboxes {
 		update_post_meta( $post_id, '_zf_estado', $estado );
 		update_post_meta( $post_id, '_zf_goles_local', $gl );
 		update_post_meta( $post_id, '_zf_goles_visitante', $gv );
-		update_post_meta( $post_id, '_zf_penales_local', $pl );
-		update_post_meta( $post_id, '_zf_penales_visitante', $pv );
+
+		if ( $empate_finalizado && $pl === $pv && ( $pl || $pv ) ) {
+			// Serie inválida: se conservan los penales anteriores y se avisa,
+			// sin perder el resto de los cambios del formulario.
+			set_transient(
+				'zf_error_' . $post_id,
+				__( 'Guardado, pero los penales no se actualizaron: quedaron iguales y necesitan una diferencia para definir al ganador.', 'zonas-partidos-futbol' ),
+				60
+			);
+		} else {
+			update_post_meta( $post_id, '_zf_penales_local', $pl );
+			update_post_meta( $post_id, '_zf_penales_visitante', $pv );
+		}
 
 		// Fecha/hora: se guarda en GMT para ordenar y mostrar correctamente.
 		$fecha_input = isset( $_POST['zf_fecha'] ) ? sanitize_text_field( wp_unslash( $_POST['zf_fecha'] ) ) : '';

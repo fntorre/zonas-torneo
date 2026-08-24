@@ -717,6 +717,7 @@ class ZF_Helpers {
 		}
 
 		ob_start();
+		echo '<!-- ZF 1.6.5 -->';
 		echo '<article class="zf-partido zf-partido-' . esc_attr( $es_resultado ? 'resultado' : 'proximo' ) . '">';
 
 		// Bloque de fecha: día de semana, número, mes y hora.
@@ -748,7 +749,10 @@ class ZF_Helpers {
 			echo '<span class="zf-marcador-sep">&ndash;</span>';
 			echo '<b class="' . esc_attr( ltrim( $puntua_visita, ' ' ) ) . '">' . esc_html( $d['gv'] ) . '</b>';
 			echo '</div>';
-			echo '<span class="zf-partido-tag">' . esc_html( $por_penales ? __( 'Definido por penales', 'zonas-partidos-futbol' ) : __( 'Final', 'zonas-partidos-futbol' ) ) . '</span>';
+			if ( $por_penales ) {
+				echo '<span class="zf-penales-linea" data-partido="' . esc_attr( $post->ID ) . '" data-pl="' . esc_attr( $d['pl'] ) . '" data-pv="' . esc_attr( $d['pv'] ) . '">' . self::icono_penal() . esc_html__( 'Penales', 'zonas-partidos-futbol' ) . ' <strong>' . esc_html( $d['pl'] ) . '&ndash;' . esc_html( $d['pv'] ) . '</strong></span>';
+			}
+			echo '<span class="zf-partido-tag">' . esc_html__( 'Final', 'zonas-partidos-futbol' ) . '</span>';
 		} else {
 			echo '<span class="zf-vs">' . esc_html__( 'VS', 'zonas-partidos-futbol' ) . '</span>';
 		}
@@ -762,16 +766,8 @@ class ZF_Helpers {
 
 		echo '</div>'; // zf-partido-fila.
 
-		// Extras: lugar · jornada · penales · estado.
+		// Extras: lugar · jornada · estado.
 		$extras = array();
-		if ( $por_penales ) {
-			$extras[] = '<span class="zf-extra zf-extra-penales">' . self::icono_penal() . sprintf(
-				/* translators: 1: penales del local. 2: penales del visitante. */
-				esc_html__( 'Penales %1$d–%2$d', 'zonas-partidos-futbol' ),
-				'<strong>' . esc_html( $d['pl'] ) . '</strong>',
-				'<strong>' . esc_html( $d['pv'] ) . '</strong>'
-			) . '</span>';
-		}
 		if ( $d['lugar'] ) {
 			$extras[] = '<span class="zf-extra zf-lugar">' . self::icono_pin() . esc_html( $d['lugar'] ) . '</span>';
 		}

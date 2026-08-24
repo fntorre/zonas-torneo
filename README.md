@@ -200,6 +200,7 @@ Creá la llave, regenerá el fixture y cargá resultados de prueba en los cruces
 
 ## 7. Changelog resumido
 
+- **1.6.2** Corrige el guardado de penales (antes se borraban si el estado o el empate no coincidían al guardar).
 - **1.6.1** Tokens oscuros autocontenidos (corrige textos blancos sobre blanco en el admin).
 - **1.6.0** Etiquetas de ronda corregidas (Cuartos/Semifinales/Final) y cuadro espejado con final central.
 - **1.5.0** Definición por penales: carga, validaciones, avance en llaves y visualización en front/admin.
