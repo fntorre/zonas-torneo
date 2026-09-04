@@ -22,11 +22,10 @@ class ZF_Hub {
 	 */
 	public static function vistas() {
 		return array(
-			'posiciones' => __( 'Posiciones', 'zonas-partidos-futbol' ),
 			'equipos'    => __( 'Equipos', 'zonas-partidos-futbol' ),
 			'proximos'   => __( 'Próximos', 'zonas-partidos-futbol' ),
 			'resultados' => __( 'Resultados', 'zonas-partidos-futbol' ),
-			'playoffs'   => __( 'Playoffs', 'zonas-partidos-futbol' ),
+			'llaves'     => __( 'Fixture', 'zonas-partidos-futbol' ),
 		);
 	}
 
@@ -88,7 +87,7 @@ class ZF_Hub {
 
 		$atts = shortcode_atts(
 			array(
-				'vista'  => 'posiciones',
+				'vista'  => 'equipos',
 				'titulo' => '',
 			),
 			$atts,
@@ -103,7 +102,7 @@ class ZF_Hub {
 
 		$vistas   = self::vistas();
 		$vista_qs = isset( $_GET['zf_vista'] ) ? sanitize_key( wp_unslash( $_GET['zf_vista'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$vista    = isset( $vistas[ $vista_qs ] ) ? $vista_qs : ( isset( $vistas[ $atts['vista'] ] ) ? $atts['vista'] : 'posiciones' );
+		$vista    = isset( $vistas[ $vista_qs ] ) ? $vista_qs : ( isset( $vistas[ $atts['vista'] ] ) ? $atts['vista'] : 'equipos' );
 
 		ob_start();
 		echo '<div class="zf-hub">';
@@ -123,24 +122,20 @@ class ZF_Hub {
 				echo '<input type="search" id="zf-buscador-equipos" class="zf-buscador" placeholder="' . esc_attr__( 'Buscar equipo por nombre…', 'zonas-partidos-futbol' ) . '" autocomplete="off" />';
 				echo '<p class="zf-sin-resultados" hidden>' . esc_html__( 'No se encontraron equipos con ese nombre.', 'zonas-partidos-futbol' ) . '</p>';
 				echo '</div>';
-				echo do_shortcode( '[zf_zonas]' );
+				echo do_shortcode( '[zf_equipos]' );
 				break;
 
 			case 'proximos':
-				echo ZF_Shortcodes::proximos( array( 'limite' => 12 ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML ya escapado dentro.
+				echo ZF_Shortcodes::proximos( array( 'limite' => 12 ) );
 				break;
 
 			case 'resultados':
-				echo ZF_Shortcodes::resultados( array( 'limite' => 12 ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML ya escapado dentro.
+				echo ZF_Shortcodes::resultados( array( 'limite' => 12 ) );
 				break;
 
-			case 'posiciones':
+			case 'llaves':
 			default:
-				echo ZF_Shortcodes::tabla(); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML ya escapado dentro.
-				break;
-
-			case 'playoffs':
-				echo ZF_Shortcodes::playoffs(); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML ya escapado dentro.
+				echo ZF_Shortcodes::playoffs();
 				break;
 		}
 		echo '</section>';
@@ -157,11 +152,10 @@ class ZF_Hub {
 	 */
 	private static function render_nav( $activa, $vistas ) {
 		$iconos = array(
-			'posiciones' => 'ZF_Helpers::icono_trofeo',
 			'equipos'    => array( __CLASS__, 'icono_escudo' ),
 			'proximos'   => 'ZF_Helpers::icono_calendario',
 			'resultados' => array( __CLASS__, 'icono_check' ),
-			'playoffs'   => array( __CLASS__, 'icono_llave' ),
+			'llaves'     => array( __CLASS__, 'icono_llave' ),
 		);
 
 		echo '<nav class="zf-hub-nav" aria-label="' . esc_attr__( 'Secciones del torneo', 'zonas-partidos-futbol' ) . '">';
@@ -201,60 +195,59 @@ class ZF_Hub {
 		echo '<header class="zf-equipo-hero">';
 		echo '<span class="zf-equipo-crest-grande">' . ZF_Helpers::render_avatar( $equipo_id, 'lg' ) . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- HTML ya escapado dentro.
 		echo '<h2 class="zf-equipo-nombre-grande">' . esc_html( $nombre ) . '</h2>';
-
-		$zonas_term = get_the_terms( $equipo_id, ZF_Install::TAX_ZONA );
-		$chips      = array();
-		$tabla_info = null;
-
-		if ( $zonas_term && ! is_wp_error( $zonas_term ) ) {
-			foreach ( $zonas_term as $zona ) {
-				$pos_en_zona = self::posicion_en_zona( $equipo_id, $zona );
-				if ( $pos_en_zona ) {
-					$chips[]     = '<span class="zf-chip zf-chip-pos">' . sprintf(
-						/* translators: 1: posición. 2: nombre de la zona. */
-						esc_html__( '%1$s° en %2$s', 'zonas-partidos-futbol' ),
-						esc_html( number_format_i18n( $pos_en_zona['pos'] ) ),
-						esc_html( $zona->name )
-					) . '</span>';
-					$chips[]     = '<span class="zf-chip">' . sprintf(
-						/* translators: %s: cantidad de puntos. */
-						esc_html__( '%s pts', 'zonas-partidos-futbol' ),
-						esc_html( number_format_i18n( $pos_en_zona['fila']['pts'] ) )
-					) . '</span>';
-					$chips[]     = '<span class="zf-chip">' . sprintf(
-						/* translators: %s: partidos jugados. */
-						esc_html__( 'PJ %s', 'zonas-partidos-futbol' ),
-						esc_html( number_format_i18n( $pos_en_zona['fila']['pj'] ) )
-					) . '</span>';
-					$tabla_info  = $pos_en_zona;
-					continue;
-				}
-				$chips[] = '<span class="zf-chip">' . esc_html( $zona->name ) . '</span>';
-			}
-		}
-
-		if ( $chips ) {
-			echo '<div class="zf-equipo-chips">' . implode( '', $chips ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- HTML ya escapado arriba.
-		}
 		echo '</header>';
 
+		// Calcular racha directamente de los partidos del equipo.
+		$jugados = ZF_Helpers::partidos_de_equipo(
+			$equipo_id,
+			array(
+				'estado' => ZF_Helpers::ESTADO_FINALIZADO,
+				'limite' => 10,
+				'orden'  => 'desc',
+			)
+		);
+
+		$forma = array();
+		foreach ( $jugados as $partido ) {
+			$d = ZF_Helpers::datos_partido( $partido );
+			if ( ! $d || ! $d['local'] || ! $d['visitante'] ) {
+				continue;
+			}
+			$es_local    = ( (int) $d['local'] === (int) $equipo_id );
+			$goles_mio   = $es_local ? $d['gl'] : $d['gv'];
+			$goles_rival = $es_local ? $d['gv'] : $d['gl'];
+
+			if ( ZF_Helpers::definido_por_penales( $d ) ) {
+				$pl   = $es_local ? $d['pl'] : $d['pv'];
+				$pv   = $es_local ? $d['pv'] : $d['pl'];
+				$forma[] = $pl > $pv ? 'G' : 'P';
+			} elseif ( $goles_mio > $goles_rival ) {
+				$forma[] = 'G';
+			} elseif ( $goles_mio < $goles_rival ) {
+				$forma[] = 'P';
+			} else {
+				$forma[] = 'E';
+			}
+		}
+		$forma = array_slice( $forma, 0, 5 );
+
 		// Racha reciente.
-		if ( $tabla_info && ! empty( $tabla_info['fila']['forma'] ) ) {
+		if ( $forma ) {
 			echo '<section class="zf-perfil-seccion">';
 			echo '<h3 class="zf-perfil-titulo">' . esc_html__( 'Racha reciente', 'zonas-partidos-futbol' ) . '</h3>';
-			echo ZF_Helpers::render_forma( $tabla_info['fila']['forma'] ); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML ya escapado dentro.
+			echo ZF_Helpers::render_forma( $forma ); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML ya escapado dentro.
 			echo '</section>';
 		}
 
 		// Últimos resultados.
-		$jugados = ZF_Helpers::partidos_de_equipo( $equipo_id, array( 'estado' => ZF_Helpers::ESTADO_FINALIZADO, 'limite' => 5, 'orden' => 'desc' ) );
+		$ultimos = array_slice( $jugados, 0, 5 );
 		echo '<section class="zf-perfil-seccion">';
 		echo '<h3 class="zf-perfil-titulo">' . esc_html__( 'Últimos resultados', 'zonas-partidos-futbol' ) . '</h3>';
 		echo '<div class="zf-lista zf-lista-resultados">';
-		if ( ! $jugados ) {
+		if ( ! $ultimos ) {
 			echo '<p class="zf-vacio">' . esc_html__( 'Todavía no hay partidos jugados.', 'zonas-partidos-futbol' ) . '</p>';
 		}
-		foreach ( $jugados as $partido ) {
+		foreach ( $ultimos as $partido ) {
 			echo ZF_Helpers::render_partido( $partido, 'resultado' ); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML ya escapado dentro.
 		}
 		echo '</div></section>';

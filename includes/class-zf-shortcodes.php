@@ -23,6 +23,7 @@ class ZF_Shortcodes {
 		add_shortcode( 'zf_proximos_partidos', array( __CLASS__, 'proximos' ) );
 		add_shortcode( 'zf_resultados', array( __CLASS__, 'resultados' ) );
 		add_shortcode( 'zf_playoffs', array( __CLASS__, 'playoffs' ) );
+		add_shortcode( 'zf_equipos', array( __CLASS__, 'equipos' ) );
 	}
 
 	/**
@@ -92,6 +93,49 @@ class ZF_Shortcodes {
 			echo '</ul></section>';
 		}
 		}
+		echo '</div>';
+		return ob_get_clean();
+	}
+
+	// =========================== [zf_equipos] ===============================
+
+	/**
+	 * Grid de todos los equipos inscriptos (sin agrupar por zona).
+	 *
+	 * @return string
+	 */
+	public static function equipos() {
+		self::css();
+		$equipos = ZF_Helpers::equipos();
+		ob_start();
+		echo '<div class="zf-zonas">';
+		echo '<section class="zf-zona-card">';
+		echo '<header class="zf-zona-head">';
+		echo '<h3 class="zf-zona-titulo">' . esc_html__( 'Equipos', 'zonas-partidos-futbol' ) . '</h3>';
+		if ( $equipos ) {
+			echo '<span class="zf-zona-count">' . esc_html(
+				sprintf(
+					/* translators: %s: cantidad de equipos. */
+					_n( '%s equipo', '%s equipos', count( $equipos ), 'zonas-partidos-futbol' ),
+					number_format_i18n( count( $equipos ) )
+				)
+			) . '</span>';
+		}
+		echo '</header>';
+		echo '<ul class="zf-zona-equipos">';
+		if ( $equipos ) {
+			foreach ( $equipos as $equipo ) {
+				$url_perfil = add_query_arg( 'zf_equipo', (int) $equipo->ID );
+				echo '<li data-nombre="' . esc_attr( $equipo->post_title ) . '">';
+				echo '<a class="zf-equipo-link" href="' . esc_url( $url_perfil ) . '">';
+				echo ZF_Helpers::render_avatar( $equipo->ID ); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML ya escapado dentro.
+				echo '<span>' . esc_html( $equipo->post_title ) . '</span>';
+				echo '</a></li>';
+			}
+		} else {
+			echo '<li class="zf-vacio">' . esc_html__( 'No hay equipos inscriptos todavía.', 'zonas-partidos-futbol' ) . '</li>';
+		}
+		echo '</ul></section>';
 		echo '</div>';
 		return ob_get_clean();
 	}

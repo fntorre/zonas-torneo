@@ -12,7 +12,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ZF_VERSION', '1.6.5' );
+define( 'ZF_VERSION', '1.7.7' );
 define( 'ZF_PLUGIN_FILE', __FILE__ );
 define( 'ZF_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ZF_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

@@ -24,6 +24,50 @@ class ZF_Admin {
 		add_action( 'manage_zf_llave_posts_custom_column', array( __CLASS__, 'contenido_columna' ), 10, 2 );
 		add_action( 'admin_post_zf_guardar_equipos_zonas', array( __CLASS__, 'guardar_equipos_zonas' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'css_admin' ) );
+		add_action( 'admin_head', array( __CLASS__, 'submenu_llave' ) );
+	}
+
+	/**
+	 * Destaca la opción "Llaves" en el submenú del plugin.
+	 * Las llaves son la instancia final del torneo, así que se
+	 * resaltan siempre (estrella dorada + acento esmeralda).
+	 */
+	public static function submenu_llave() {
+		$screen    = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		$post_type = $screen ? (string) $screen->post_type : '';
+		$activa    = ZF_Install::CPT_LLAVE === $post_type;
+		?>
+		<style>
+		#adminmenu #menu-posts-zf_partido .wp-submenu a[href="edit.php?post_type=zf_llave"] {
+			position: relative;
+			padding-left: 24px;
+			color: #a7f3d0;
+			font-weight: 700;
+		}
+		#adminmenu #menu-posts-zf_partido .wp-submenu a[href="edit.php?post_type=zf_llave"]::before {
+			content: "\2605";
+			position: absolute;
+			left: 9px;
+			top: 50%;
+			transform: translateY(-48%);
+			font-size: 10px;
+			line-height: 1;
+			color: #fbbf24;
+		}
+		#adminmenu #menu-posts-zf_partido .wp-submenu a[href="edit.php?post_type=zf_llave"]:hover,
+		#adminmenu #menu-posts-zf_partido .wp-submenu a[href="edit.php?post_type=zf_llave"].current {
+			background: rgba(34, 197, 94, .16);
+			color: #f0fdf4;
+		}
+		<?php if ( $activa ) : ?>
+		#adminmenu #menu-posts-zf_partido .wp-submenu a[href="edit.php?post_type=zf_llave"].current {
+			border-left: 3px solid #22c55e;
+			margin-left: -3px;
+			color: #fff;
+		}
+		<?php endif; ?>
+		</style>
+		<?php
 	}
 
 	/**
@@ -248,7 +292,11 @@ class ZF_Admin {
 				<div class="zf-sc-lista">
 					<div class="zf-sc-item">
 						<code>[zf_hub]</code>
-						<p><?php esc_html_e( 'Hub completo: posiciones, equipos, partidos y playoffs con navegación por pestañas.', 'zonas-partidos-futbol' ); ?></p>
+						<p><?php esc_html_e( 'Hub completo: equipos, partidos y fixture con navegación por pestañas.', 'zonas-partidos-futbol' ); ?></p>
+					</div>
+					<div class="zf-sc-item">
+						<code>[zf_equipos]</code>
+						<p><?php esc_html_e( 'Grid de todos los equipos inscriptos con links a sus perfiles.', 'zonas-partidos-futbol' ); ?></p>
 					</div>
 					<div class="zf-sc-item">
 						<code>[zf_zonas]</code>
@@ -389,8 +437,9 @@ class ZF_Admin {
 		echo '<div class="zf-llave-resumen">';
 		echo '<span class="zf-chip-info">' . esc_html(
 			sprintf(
-				/* translators: %d: cantidad de equipos del cuadro. */
-				__( 'Cuadro de %d', 'zonas-partidos-futbol' ),
+				/* translators: 1: number of teams. 2: bracket size. */
+				__( '%1$d equipos · cuadro de %2$d', 'zonas-partidos-futbol' ),
+				(int) ( $config['total'] ?? 0 ),
 				(int) $config['size']
 			)
 		) . '</span>';
@@ -398,9 +447,8 @@ class ZF_Admin {
 		if ( $campeon ) {
 			echo '<span class="zf-chip-info zf-chip-campeon">' . esc_html( ZF_Helpers::nombre_equipo( $campeon ) ) . '</span>';
 		} else {
-			$jugados   = 0;
-			$totales   = (int) ( $config['total'] ?? 0 );
-			$partidos  = ZF_Llaves::partidos_de_llave( $post_id );
+			$jugados  = 0;
+			$partidos = ZF_Llaves::partidos_de_llave( $post_id );
 			foreach ( $partidos as $grupo ) {
 				foreach ( $grupo as $partido ) {
 					if ( ZF_Helpers::ESTADO_FINALIZADO === get_post_meta( $partido->ID, '_zf_estado', true ) ) {
@@ -408,12 +456,16 @@ class ZF_Admin {
 					}
 				}
 			}
+			$total_partidos = 0;
+			foreach ( $partidos as $grupo ) {
+				$total_partidos += count( $grupo );
+			}
 			echo '<span class="zf-chip-info zf-chip-progreso">' . esc_html(
 				sprintf(
 					/* translators: 1: jugados. 2: totales. */
 					__( '%1$d / %2$d jugados', 'zonas-partidos-futbol' ),
 					$jugados,
-					$totales
+					$total_partidos
 				)
 			) . '</span>';
 		}

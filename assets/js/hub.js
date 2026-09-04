@@ -27,6 +27,7 @@
 
 		var visibles = 0;
 
+		// Search flat team list items (works for both zf_zonas and zf_equipos).
 		contenedor.querySelectorAll( '.zf-zona-equipos li[data-nombre]' ).forEach( function ( item ) {
 			var coincide = ! consulta || normalizar( item.getAttribute( 'data-nombre' ) ).indexOf( consulta ) !== -1;
 			item.hidden = ! coincide;
@@ -35,6 +36,7 @@
 			}
 		} );
 
+		// Toggle zone cards visibility when searching.
 		contenedor.querySelectorAll( '.zf-zona-card' ).forEach( function ( tarjeta ) {
 			var conEquipos = tarjeta.querySelector( '.zf-zona-equipos li[data-nombre]:not([hidden])' );
 			tarjeta.hidden = !! consulta && ! conEquipos;

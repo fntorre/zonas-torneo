@@ -47,12 +47,8 @@ class ZF_Llaves {
 	public static function render_metabox( $post ) {
 		wp_nonce_field( 'zf_llave_meta', 'zf_llave_nonce' );
 
-		$zonas_elegidas = get_post_meta( $post->ID, '_zf_zonas', true );
-		$zonas_elegidas = is_array( $zonas_elegidas ) ? array_map( 'absint', $zonas_elegidas ) : array();
-		$clasificados   = (int) get_post_meta( $post->ID, '_zf_clasificados', true );
-		if ( $clasificados < 1 ) {
-			$clasificados = (int) apply_filters( 'zf_clasificados_por_zona', 2 );
-		}
+		$equipos_seleccionados = get_post_meta( $post->ID, '_zf_equipos_seleccionados', true );
+		$equipos_seleccionados = is_array( $equipos_seleccionados ) ? array_map( 'absint', $equipos_seleccionados ) : array();
 
 		$error = get_transient( 'zf_error_' . $post->ID );
 		if ( $error ) {
@@ -60,46 +56,112 @@ class ZF_Llaves {
 			echo '<div class="notice notice-error"><p>' . esc_html( $error ) . '</p></div>';
 		}
 
-		$zonas = ZF_Helpers::zonas();
+		$equipos = ZF_Helpers::equipos();
 
-		if ( ! $zonas ) {
-			echo '<p>' . esc_html__( 'Primero creá zonas en Campeonato → Zonas.', 'zonas-partidos-futbol' ) . '</p>';
+		if ( ! $equipos ) {
+			echo '<p>' . esc_html__( 'No hay equipos inscriptos. Primero cargá equipos desde Inscripciones Fútbol.', 'zonas-partidos-futbol' ) . '</p>';
 			return;
 		}
+
+		$count      = count( $equipos_seleccionados );
+		$cuadro_tmp = self::calcular_cuadro( $count );
+
+		// Enqueue the admin llave JS.
+		wp_enqueue_script(
+			'zf-llave-admin',
+			ZF_PLUGIN_URL . 'assets/js/llave-admin.js',
+			array(),
+			ZF_VERSION,
+			true
+		);
 		?>
-		<div class="zf-form">
+		<div class="zf-form" id="zf-llave-admin-root">
+
 			<section class="zf-seccion zf-seccion--cruce">
 				<header class="zf-seccion-head">
 					<span class="zf-seccion-icono dashicons dashicons-shield" aria-hidden="true"></span>
 					<div class="zf-seccion-textos">
-						<h4><?php esc_html_e( 'Zonas que clasifican', 'zonas-partidos-futbol' ); ?></h4>
-						<p><?php esc_html_e( 'Elegí de qué zonas se toman los mejores equipos.', 'zonas-partidos-futbol' ); ?></p>
+						<h4><?php esc_html_e( 'Equipos participantes', 'zonas-partidos-futbol' ); ?></h4>
+						<p><?php esc_html_e( 'Buscá y agregá equipos. Arrastrá para reordenar el seeding (1 = cabeza de serie).', 'zonas-partidos-futbol' ); ?></p>
 					</div>
 				</header>
-				<div class="zf-chips">
-					<?php foreach ( $zonas as $zona ) : ?>
-						<label class="zf-chip">
-							<input type="checkbox" name="zf_llave_zonas[]" value="<?php echo esc_attr( $zona->term_id ); ?>" <?php checked( in_array( (int) $zona->term_id, $zonas_elegidas, true ) ); ?> />
-							<span><?php echo esc_html( $zona->name ); ?></span>
-						</label>
-					<?php endforeach; ?>
+
+				<div class="zf-llave-buscar-wrap">
+					<span class="dashicons dashicons-search" aria-hidden="true"></span>
+					<input type="search" id="zf-ll-buscar" class="zf-llave-buscar" placeholder="<?php esc_attr_e( 'Buscar equipo por nombre…', 'zonas-partidos-futbol' ); ?>" autocomplete="off" />
+				</div>
+
+				<div class="zf-llave-two-panel">
+
+					<div class="zf-llave-col">
+						<div class="zf-ll-col-head">
+							<strong><?php esc_html_e( 'Disponibles', 'zonas-partidos-futbol' ); ?></strong>
+							<span class="zf-ll-count" id="zf-ll-disp-count"><?php echo esc_html( count( $equipos ) - $count ); ?></span>
+						</div>
+						<div class="zf-ll-lista zf-ll-lista-disp" id="zf-ll-disponibles"></div>
+					</div>
+
+					<div class="zf-llave-col zf-llave-col-sel">
+						<div class="zf-ll-col-head">
+							<div class="zf-ll-col-head-left">
+								<strong><?php esc_html_e( 'Seleccionados', 'zonas-partidos-futbol' ); ?></strong>
+								<span class="zf-ll-count" id="zf-ll-sel-count"><?php echo esc_html( $count ); ?></span>
+							</div>
+							<div class="zf-ll-col-head-right">
+								<label class="zf-equipos-toggle-all">
+									<input type="checkbox" id="zf_toggle_todos" <?php checked( $count === count( $equipos ) ); ?> />
+									<span><?php
+										printf(
+											/* translators: 1: number selected. 2: total teams. */
+											esc_html__( 'Todos (%1$d/%2$d)', 'zonas-partidos-futbol' ),
+											$count,
+											count( $equipos )
+										);
+									?></span>
+								</label>
+								<button type="button" class="button button-small" id="zf-ll-clear"><?php esc_html_e( 'Limpiar', 'zonas-partidos-futbol' ); ?></button>
+							</div>
+						</div>
+						<div class="zf-ll-lista zf-ll-lista-sel" id="zf-ll-seleccionados">
+							<?php if ( 0 === $count ) : ?>
+								<div class="zf-ll-placeholder"><?php esc_html_e( 'Arrastrá equipos aquí o hacé clic en +', 'zonas-partidos-futbol' ); ?></div>
+							<?php endif; ?>
+						</div>
+						<div class="zf-llave-cuadro-info">
+							<span class="zf-equipos-cuadro" id="zf_cuadro_info">
+								<?php
+								if ( $count >= 2 ) {
+									$byes = $cuadro_tmp - $count;
+									$texto_byes = 1 === $byes ? ' · ' . esc_html__( '1 pasa directo', 'zonas-partidos-futbol' ) : ( $byes > 1 ? ' · ' . sprintf( /* translators: %d: number of byes. */ esc_html__( '%d pasan directo', 'zonas-partidos-futbol' ), $byes ) : '' );
+									printf(
+										/* translators: 1: number of teams. 2: bracket size. 3: byes info. */
+										esc_html__( '%1$d equipos → Cuadro de %2$d%3$s', 'zonas-partidos-futbol' ),
+										$count,
+										$cuadro_tmp,
+										$texto_byes
+									);
+								} elseif ( 1 === $count ) {
+									esc_html_e( '1 equipo seleccionado', 'zonas-partidos-futbol' );
+								} else {
+									esc_html_e( 'Ningún equipo seleccionado', 'zonas-partidos-futbol' );
+								}
+								?>
+							</span>
+						</div>
+					</div>
+
 				</div>
 			</section>
 
-			<section class="zf-seccion zf-seccion--agenda">
+			<section class="zf-seccion zf-seccion--preview">
 				<header class="zf-seccion-head">
-					<span class="zf-seccion-icono dashicons dashicons-awards" aria-hidden="true"></span>
+					<span class="zf-seccion-icono dashicons dashicons-slides" aria-hidden="true"></span>
 					<div class="zf-seccion-textos">
-						<h4><?php esc_html_e( 'Formato del cuadro', 'zonas-partidos-futbol' ); ?></h4>
-						<p><?php esc_html_e( 'Cuántos equipos clasifica cada zona. El tamaño del cuadro se ajusta solo.', 'zonas-partidos-futbol' ); ?></p>
+						<h4><?php esc_html_e( 'Vista previa del cuadro', 'zonas-partidos-futbol' ); ?></h4>
+						<p><?php esc_html_e( 'Cómo quedarían los cruces según el orden de seeding actual.', 'zonas-partidos-futbol' ); ?></p>
 					</div>
 				</header>
-				<div class="zf-seccion-grid">
-					<p class="zf-campo">
-						<label for="zf_clasificados"><?php esc_html_e( 'Clasificados por zona', 'zonas-partidos-futbol' ); ?></label>
-						<input type="number" name="zf_clasificados" id="zf_clasificados" min="1" max="16" value="<?php echo esc_attr( $clasificados ); ?>" class="zf-input-num" />
-					</p>
-				</div>
+				<div class="zf-llave-preview" id="zf-ll-preview"></div>
 			</section>
 
 			<div class="zf-peligro">
@@ -107,14 +169,32 @@ class ZF_Llaves {
 					<input type="checkbox" name="zf_regenerar" id="zf_regenerar" value="1" />
 					<span class="zf-peligro-texto">
 						<strong><?php esc_html_e( 'Regenerar fixture', 'zonas-partidos-futbol' ); ?></strong>
-						<?php esc_html_e( 'Borra todos los partidos actuales de esta llave y los vuelve a crear desde las tablas de posiciones.', 'zonas-partidos-futbol' ); ?>
+						<?php esc_html_e( 'Borra todos los partidos actuales de esta llave y los vuelve a crear con los equipos seleccionados.', 'zonas-partidos-futbol' ); ?>
 					</span>
 				</label>
 			</div>
 
 			<?php self::panel_estado( $post ); ?>
-			<p class="zf-metabox-nota"><?php esc_html_e( 'Al regenerar, los clasificados se toman de las tablas (primeros puestos). Los resultados cargados hacen avanzar a los equipos automáticamente hasta definir al campeón.', 'zonas-partidos-futbol' ); ?></p>
+			<p class="zf-metabox-nota"><?php esc_html_e( 'Al regenerar se crean todos los partidos del cuadro. Los resultados cargados hacen avanzar a los equipos automáticamente hasta definir al campeón.', 'zonas-partidos-futbol' ); ?></p>
 		</div>
+		<script>
+		var ZF_LL_EQUIPOS=<?php
+			$equipo_data = array();
+			foreach ( $equipos as $eq ) {
+				$equipo_data[] = array(
+					'id'     => (int) $eq->ID,
+					'nombre' => $eq->post_title,
+					'avatar' => ZF_Helpers::render_avatar( $eq->ID ),
+				);
+			}
+			echo wp_json_encode( $equipo_data );
+		?>;
+		var ZF_LL_SELECCIONADOS=<?php echo wp_json_encode( $equipos_seleccionados ); ?>;
+		var ZF_LL_PARTIDOS=<?php
+			$partidos_data = self::partidos_data_preview( $post->ID );
+			echo wp_json_encode( $partidos_data );
+		?>;
+		</script>
 		<?php
 	}
 
@@ -158,13 +238,9 @@ class ZF_Llaves {
 			if ( empty( $agrupados[ $r ] ) ) {
 				echo '<em>' . esc_html__( 'sin partidos', 'zonas-partidos-futbol' ) . '</em>';
 			} else {
-				$items = array();
 				foreach ( $agrupados[ $r ] as $partido ) {
-					$estado  = (string) get_post_meta( $partido->ID, '_zf_estado', true );
-					$clase   = ZF_Helpers::ESTADO_FINALIZADO === $estado ? ' zf-listo' : '';
-					$items[] = '<a class="zf-enlace-partido' . esc_attr( $clase ) . '" href="' . esc_url( get_edit_post_link( $partido->ID ) ) . '">' . esc_html( $partido->post_title ) . '</a>';
+					echo self::panel_partido_resultado( $partido );
 				}
-				echo implode( '<span class="zf-sep-puntos">·</span>', $items ); // phpcs:ignore WordPress.Security.EscapeOutput -- piezas escapadas arriba.
 			}
 			echo '</td></tr>';
 		}
@@ -178,6 +254,75 @@ class ZF_Llaves {
 		echo '</td></tr>';
 
 		echo '</tbody></table></section>';
+	}
+
+	/**
+	 * Mini tarjeta de partido con marcador para el panel "Fixture generado".
+	 * Muestra local, resultado y visitante, como en el frontend.
+	 *
+	 * @param WP_Post $partido Partido.
+	 * @return string
+	 */
+	private static function panel_partido_resultado( $partido ) {
+		$d = ZF_Helpers::datos_partido( $partido );
+		if ( ! $d ) {
+			return '';
+		}
+
+		$finalizado = ZF_Helpers::ESTADO_FINALIZADO === $d['estado'];
+		$ganador    = self::ganador_de( $partido );
+
+		// Pie: penales si se definió por penales, o estado no finalizado.
+		$pie = '';
+		if ( ZF_Helpers::definido_por_penales( $d ) ) {
+			$pie = sprintf(
+				/* translators: 1: penales local. 2: penales visitante. */
+				__( 'Penales %1$d–%2$d', 'zonas-partidos-futbol' ),
+				$d['pl'],
+				$d['pv']
+			);
+		} elseif ( ! $finalizado ) {
+			$pie = ZF_Helpers::estado_label( $d['estado'] );
+		}
+
+		$marcador = $finalizado ? esc_html( $d['gl'] ) . '&ndash;' . esc_html( $d['gv'] ) : esc_html__( 'vs', 'zonas-partidos-futbol' );
+		$html = '<div class="zf-pp-resultado">'
+			. self::panel_pp_equipo( $d['local'], $ganador, $finalizado, $d['gl'] )
+			. '<span class="zf-pp-marcador">' . $marcador . '</span>'
+			. self::panel_pp_equipo( $d['visitante'], $ganador, $finalizado, $d['gv'] )
+			. '<a class="zf-pp-enlace" href="' . esc_url( get_edit_post_link( $partido->ID ) ) . '" title="' . esc_attr__( 'Editar partido', 'zonas-partidos-futbol' ) . '">' . esc_html__( 'Editar', 'zonas-partidos-futbol' ) . '</a>'
+			. ( $pie ? '<span class="zf-pp-pie">' . esc_html( $pie ) . '</span>' : '' )
+			. '</div>';
+
+		return $html; // phpcs:ignore WordPress.Security.EscapeOutput -- HTML escapado pieza por pieza.
+	}
+
+	/**
+	 * Render de cada lado (equipo) de la mini tarjeta de partido.
+	 *
+	 * @param int  $equipo_id     ID de equipo (0 = pendiente).
+	 * @param int  $ganador       ID del ganador.
+	 * @param bool $finalizado    Si el partido finalizó.
+	 * @param int  $goles         Goles del lado.
+	 * @return string
+	 */
+	private static function panel_pp_equipo( $equipo_id, $ganador, $finalizado, $goles ) {
+		$clase = 'zf-pp-pp';
+		if ( $ganador && $equipo_id === $ganador ) {
+			$clase .= ' is-winner';
+		} elseif ( $finalizado && $equipo_id !== $ganador ) {
+			$clase .= ' is-loser';
+		}
+
+		if ( $equipo_id ) {
+			$nombre = ZF_Helpers::nombre_equipo( $equipo_id );
+		} else {
+			$nombre = __( 'A definir', 'zonas-partidos-futbol' );
+			$clase .= ' is-pendiente';
+			$goles  = 0;
+		}
+
+		return '<span class="' . esc_attr( $clase ) . '">' . esc_html( $nombre ) . '</span>';
 	}
 
 	/**
@@ -198,72 +343,67 @@ class ZF_Llaves {
 			return;
 		}
 
-		// Zonas seleccionadas.
-		$zonas_in = isset( $_POST['zf_llave_zonas'] ) ? array_map( 'absint', (array) wp_unslash( $_POST['zf_llave_zonas'] ) ) : array();
-		$zonas    = array();
-		foreach ( $zonas_in as $term_id ) {
-			$term = get_term( $term_id, ZF_Install::TAX_ZONA );
-			if ( $term && ! is_wp_error( $term ) ) {
-				$zonas[] = (int) $term_id;
+		// Equipos seleccionados.
+		$equipos_in = isset( $_POST['zf_llave_equipos'] ) ? array_map( 'absint', (array) wp_unslash( $_POST['zf_llave_equipos'] ) ) : array();
+		$equipos    = array();
+		foreach ( $equipos_in as $equipo_id ) {
+			if ( $equipo_id && 'if_equipo' === get_post_type( $equipo_id ) ) {
+				$equipos[] = (int) $equipo_id;
 			}
 		}
 
-		$n = isset( $_POST['zf_clasificados'] ) ? absint( $_POST['zf_clasificados'] ) : 2;
-		$n = min( 16, max( 1, $n ) );
-
-		update_post_meta( $post_id, '_zf_zonas', $zonas );
-		update_post_meta( $post_id, '_zf_clasificados', $n );
+		update_post_meta( $post_id, '_zf_equipos_seleccionados', $equipos );
 
 		$regenerar = ! empty( $_POST['zf_regenerar'] );
 		if ( $regenerar ) {
-			if ( ! $zonas ) {
-				set_transient( 'zf_error_' . $post_id, __( 'Elegí al menos una zona para generar el fixture.', 'zonas-partidos-futbol' ), 60 );
+			if ( count( $equipos ) < 2 ) {
+				set_transient( 'zf_error_' . $post_id, __( 'Seleccioná al menos 2 equipos para generar el fixture.', 'zonas-partidos-futbol' ), 60 );
 				return;
 			}
-			self::generar_fixture( $post_id, $zonas, $n );
+			self::generar_fixture( $post_id, $equipos );
 		}
 	}
 
 	// ========================= Generación ==================================.
 
 	/**
-	 * Genera el cuadro completo a partir de las tablas de posiciones.
+	 * Calcula la potencia de 2 inmediata superior para una cantidad dada.
 	 *
-	 * @param int   $llave_id ID de la llave.
-	 * @param int[] $zonas_ids Term IDs de zonas.
-	 * @param int   $n        Clasificados por zona.
+	 * @param int $count Cantidad de equipos.
+	 * @return int Tamaño del cuadro (potencia de 2).
+	 */
+	public static function calcular_cuadro( $count ) {
+		$size = 2;
+		while ( $size < $count ) {
+			$size *= 2;
+		}
+		return $size;
+	}
+
+	/**
+	 * Genera el cuadro completo a partir de una lista manual de equipos.
+	 *
+	 * @param int   $llave_id  ID de la llave.
+	 * @param int[] $equipos_ids IDs de los equipos (if_equipo).
 	 * @return bool
 	 */
-	public static function generar_fixture( $llave_id, $zonas_ids, $n ) {
-		// Semillas intercalando posiciones entre zonas: A1, B1, A2, B2…
-		$seeds = array();
-		for ( $pos = 0; $pos < $n; $pos++ ) {
-			foreach ( $zonas_ids as $zona_id ) {
-				$term  = get_term( $zona_id, ZF_Install::TAX_ZONA );
-				$filas = ( $term && ! is_wp_error( $term ) ) ? ZF_Helpers::tabla_zona( $term ) : array();
-				if ( isset( $filas[ $pos ] ) ) {
-					$seeds[] = (int) $filas[ $pos ]['id'];
-				}
-			}
-		}
-
-		if ( count( $seeds ) < 2 ) {
-			set_transient( 'zf_error_' . $llave_id, __( 'No hay suficientes equipos con resultados para armar la llave.', 'zonas-partidos-futbol' ), 60 );
+	public static function generar_fixture( $llave_id, $equipos_ids ) {
+		if ( count( $equipos_ids ) < 2 ) {
+			set_transient( 'zf_error_' . $llave_id, __( 'Se necesitan al menos 2 equipos para armar la llave.', 'zonas-partidos-futbol' ), 60 );
 			return false;
 		}
 
+		$seeds = array_map( 'intval', $equipos_ids );
+
 		// Tamaño del cuadro: potencia de 2 inmediata superior.
-		$size = 2;
-		while ( $size < count( $seeds ) ) {
-			$size *= 2;
-		}
+		$size = self::calcular_cuadro( count( $seeds ) );
 
 		// Relleno con byes (0) y orden estándar de siembras.
 		while ( count( $seeds ) < $size ) {
 			$seeds[] = 0;
 		}
-		$orden   = self::orden_seeds( $size );
-		$cuadro  = array();
+		$orden  = self::orden_seeds( $size );
+		$cuadro = array();
 		foreach ( $orden as $seed_num ) {
 			$cuadro[] = isset( $seeds[ $seed_num - 1 ] ) ? (int) $seeds[ $seed_num - 1 ] : 0;
 		}
@@ -283,11 +423,10 @@ class ZF_Llaves {
 		}
 
 		update_post_meta( $llave_id, '_zf_config', array(
-			'zonas'  => array_map( 'intval', $zonas_ids ),
-			'n'      => (int) $n,
-			'size'   => (int) $size,
-			'total'  => count( array_filter( $cuadro ) ),
-			'seeds'  => array_map( 'intval', $cuadro ),
+			'equipos' => array_map( 'intval', $equipos_ids ),
+			'size'    => (int) $size,
+			'total'   => count( array_filter( $cuadro ) ),
+			'seeds'   => array_map( 'intval', $cuadro ),
 		) );
 
 		// Crear el árbol completo: todas las rondas existen desde el inicio;
@@ -492,6 +631,37 @@ class ZF_Llaves {
 		}
 		ksort( $agrupado );
 		return $agrupado;
+	}
+
+	/**
+	 * Datos de partidos de la llave listos para el preview JS del admin.
+	 * Cada partido se indexa por "ronda:slot" para que el cuadro espejado
+	 * pueda pintar el marcador y el ganador reales.
+	 *
+	 * @param int $llave_id ID.
+	 * @return array
+	 */
+	public static function partidos_data_preview( $llave_id ) {
+		$agrupado = self::partidos_de_llave( $llave_id );
+		$data     = array();
+		foreach ( $agrupado as $ronda => $fila ) {
+			foreach ( $fila as $slot => $partido ) {
+				$d          = ZF_Helpers::datos_partido( $partido );
+				$ganador    = $d ? self::ganador_de( $partido ) : 0;
+				$finalizado = $d && ZF_Helpers::ESTADO_FINALIZADO === $d['estado'];
+				$data[ $ronda . ':' . $slot ] = array(
+					'local'     => $d ? (int) $d['local'] : 0,
+					'visitante' => $d ? (int) $d['visitante'] : 0,
+					'gl'        => $d ? (int) $d['gl'] : 0,
+					'gv'        => $d ? (int) $d['gv'] : 0,
+					'pl'        => $d ? (int) $d['pl'] : 0,
+					'pv'        => $d ? (int) $d['pv'] : 0,
+					'ganador'   => (int) $ganador,
+					'final'     => $finalizado,
+				);
+			}
+		}
+		return $data;
 	}
 
 	/**

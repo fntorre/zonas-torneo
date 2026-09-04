@@ -268,7 +268,7 @@
 
 @media (max-width: 480px) {
 	.zf-nav-item {
-		min-width: 100%;
+		min-width: calc(50% - 6px);
 	}
 	.zf-equipo-nombre-grande {
 		font-size: 1.3rem;
