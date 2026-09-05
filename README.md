@@ -8,7 +8,7 @@ Plugin de WordPress para gestionar un torneo de fútbol con **fase de zonas** (f
 
 - WordPress 5.8+ con PHP 7.4+.
 - Plugin **Inscripciones Fútbol** activo: de ahí salen los equipos (`if_equipo`) y sus escudos. Sin él no vas a poder elegir equipos ni ver la asignación por zonas.
-- Los menús del plugin viven bajo el menú **Partidos** del admin (tipo de contenido *Partidos*, submenús *Posiciones*, *Equipos por zona* y *Ajustes*; las *Llaves* tienen su propio ítem).
+- Los menús del plugin viven bajo el menú **Partidos** del admin (tipo de contenido *Partidos*, con las *Zonas* como taxonomía y las *Llaves* como submenú).
 
 ---
 
@@ -35,11 +35,10 @@ Plugin de WordPress para gestionar un torneo de fútbol con **fase de zonas** (f
 
 ### Paso 2 — Asignar los equipos a cada zona
 
-1. Ir a **Partidos → Equipos por zona**.
-2. Para cada equipo elegir su zona en la lista desplegable.
-3. Presionar **Guardar zonas** (el botón queda fijo abajo mientras hacés scroll).
+1. Abrir cada equipo en **Inscripciones Fútbol**.
+2. En la caja **Zonas**, asignarle su zona (ej.: *Zona A*).
 
-Los equipos que queden en *— Sin zona —* no aparecen en ninguna tabla ni en los listados por zona.
+Los equipos sin zona no aparecen en las tablas de posiciones ni en los listados por zona.
 
 ### Paso 3 — Crear el fixture (partidos)
 
@@ -166,10 +165,7 @@ Sin `llave` muestra la primera publicada. Las etiquetas de ronda se ajustan sola
 |---|---|
 | **Partidos → Todos los partidos** | Lista con columnas Zona, Fecha y hora y Resultado/Estado (incluye chip *Pen.* y etiqueta de ronda en los de playoffs; badge *Playoffs* si no tiene zona). |
 | **Partidos → Llaves** | Lista de cuadros con columna *Fixture*: tamaño, progreso "X / Y jugados" o campeón definido. |
-| **Editar llave** | Chips de zonas, clasificados, regenerar y panel *Fixture generado* con accesos a cada partido. |
-| **Partidos → Posiciones** | Vista previa exacta de lo que ven tus visitantes. |
-| **Partidos → Equipos por zona** | Asignación masiva de equipos. |
-| **Partidos → Ajustes** | Puntos por victoria / empate / derrota (por defecto 3–1–0) y referencia de shortcodes. |
+| **Editar llave** | Selección y orden de equipos (drag & drop), panel *Fixture generado* y vista previa del cuadro. |
 
 Estados de partido y cómo se ven:
 
@@ -182,7 +178,7 @@ Estados de partido y cómo se ven:
 ## 6. Preguntas frecuentes
 
 **¿Puedo cambiar los puntos de la victoria?**
-Sí, en *Ajustes del campeonato*. Las tablas se recalculan al instante.
+No por ahora: la puntuación queda fija en 3 puntos por victoria, 1 por empate y 0 por derrota.
 
 **Cambié "clasificados por zona" pero las tablas seguían mostrando el valor viejo.**
 Eso ya está corregido: las tablas leen el valor de la llave apenas lo guardás. El cuadro de playoffs en sí solo se rearma si tildás *Regenerar fixture* (para no borrar partidos jugados).
