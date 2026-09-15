@@ -1154,14 +1154,19 @@ class ZF_Llaves {
 	 * @return string
 	 */
 	public static function render_llave( $llave ) {
-		$config = get_post_meta( $llave->ID, '_zf_config', true );
+		$config     = get_post_meta( $llave->ID, '_zf_config', true );
+		$hay_fixture = is_array( $config ) && ! empty( $config['size'] );
 		ob_start();
 
 		echo '<section class="zf-tabla-wrap zf-llave-wrap">';
 		echo '<header class="zf-tabla-head">';
 		echo '<h3 class="zf-tabla-titulo">' . ZF_Helpers::icono_trofeo() . esc_html( $llave->post_title ) . '</h3>';
+		echo '<div class="zf-tabla-acciones">';
+		if ( $hay_fixture ) {
+			echo self::boton_pantalla_completa(); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML escapado pieza por pieza.
+		}
 		echo '<span class="zf-tabla-sub">' . esc_html__( 'Eliminatorias', 'zonas-partidos-futbol' ) . '</span>';
-		echo '</header>';
+		echo '</div></header>';
 
 		if ( ! is_array( $config ) || empty( $config['size'] ) ) {
 			echo '<p class="zf-vacio">' . esc_html__( 'Esta llave todavía no tiene fixture generado.', 'zonas-partidos-futbol' ) . '</p>';
@@ -1176,7 +1181,7 @@ class ZF_Llaves {
 		$agrupado = self::partidos_de_llave( $llave->ID );
 		$campeon  = (int) get_post_meta( $llave->ID, '_zf_campeon', true );
 
-		echo '<div class="zf-llave-scroll"><div class="zf-llave-grid zf-llave-espejo">';
+		echo '<div class="zf-llave-scroll"><div class="zf-llave-fit"><div class="zf-llave-grid zf-llave-espejo">';
 
 		// Lado izquierdo: primera mitad de cada ronda previa a la final.
 		for ( $r = 0; $r < $rondas - 1; $r++ ) {
@@ -1230,8 +1235,41 @@ class ZF_Llaves {
 			echo '</div>';
 		}
 
-		echo '</div></div></section>';
+		echo '</div></div></div>';
+		echo self::controles_pantalla_completa(); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML escapado pieza por pieza.
+		echo '</section>';
 		return ob_get_clean();
+	}
+
+	/**
+	 * Controles de zoom de la vista de pantalla completa.
+	 *
+	 * @return string
+	 */
+	private static function controles_pantalla_completa() {
+		return '<div class="zf-fs-controls">'
+			. '<div class="zf-fs-panel">'
+			. '<button type="button" class="zf-fs-zoom" data-zf-zoom="out" aria-label="' . esc_attr__( 'Alejar', 'zonas-partidos-futbol' ) . '">−</button>'
+			. '<span class="zf-fs-nivel">100%</span>'
+			. '<button type="button" class="zf-fs-zoom" data-zf-zoom="in" aria-label="' . esc_attr__( 'Acercar', 'zonas-partidos-futbol' ) . '">+</button>'
+			. '<button type="button" class="zf-fs-restaurar" data-zf-zoom="fit">' . esc_html__( 'Ajustar', 'zonas-partidos-futbol' ) . '</button>'
+			. '</div>'
+			. '<p class="zf-fs-pista">' . esc_html__( 'Rueda: zoom · Ctrl+Rueda: zoom fuera de pantalla completa · Barras: mover', 'zonas-partidos-futbol' ) . '</p>'
+			. '</div>';
+	}
+
+	/**
+	 * Botón que alterna la vista de pantalla completa del cuadro.
+	 *
+	 * @return string
+	 */
+	private static function boton_pantalla_completa() {
+		return '<button type="button" class="zf-fs-btn" aria-label="' . esc_attr__( 'Ver en pantalla completa', 'zonas-partidos-futbol' ) . '" title="' . esc_attr__( 'Pantalla completa', 'zonas-partidos-futbol' ) . '">'
+			. '<svg class="zf-fs-icono zf-fs-entrar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>'
+			. '<svg class="zf-fs-icono zf-fs-salir" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>'
+			. '<span class="zf-fs-texto zf-fs-entrar">' . esc_html__( 'Pantalla completa', 'zonas-partidos-futbol' ) . '</span>'
+			. '<span class="zf-fs-texto zf-fs-salir">' . esc_html__( 'Salir', 'zonas-partidos-futbol' ) . '</span>'
+			. '</button>';
 	}
 
 	/**

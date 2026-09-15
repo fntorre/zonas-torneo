@@ -36,6 +36,13 @@ class ZF_Shortcodes {
 			array(),
 			ZF_VERSION
 		);
+		wp_register_script(
+			'zf-frontend',
+			ZF_PLUGIN_URL . 'assets/js/frontend.js',
+			array(),
+			ZF_VERSION,
+			true
+		);
 	}
 
 	/**
@@ -44,6 +51,15 @@ class ZF_Shortcodes {
 	private static function css() {
 		if ( ! wp_style_is( 'zf-frontend', 'enqueued' ) ) {
 			wp_enqueue_style( 'zf-frontend' );
+		}
+	}
+
+	/**
+	 * Encola el JS del frontend (pantalla completa de las llaves).
+	 */
+	private static function js() {
+		if ( ! wp_script_is( 'zf-frontend', 'enqueued' ) ) {
+			wp_enqueue_script( 'zf-frontend' );
 		}
 	}
 
@@ -291,6 +307,7 @@ class ZF_Shortcodes {
 	 */
 	public static function playoffs( $atts = array() ) {
 		self::css();
+		self::js();
 		$atts = shortcode_atts(
 			array( 'llave' => '' ),
 			$atts,

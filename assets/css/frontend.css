@@ -933,6 +933,183 @@ table.zf-tabla td.zf-col-forma {
 	}
 }
 
+/* ---------------- Pantalla completa de la llave --------------- */
+
+.zf-tabla-acciones {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.zf-fs-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	padding: 7px 14px;
+	border-radius: 999px;
+	background: linear-gradient(180deg, var(--zf-panel-3), var(--zf-panel-2));
+	border: 1px solid var(--zf-borde);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05);
+	color: var(--zf-mutado);
+	font: inherit;
+	font-size: .74rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .06em;
+	white-space: nowrap;
+	cursor: pointer;
+	transition: color var(--zf-transicion), border-color var(--zf-transicion), transform var(--zf-transicion);
+}
+.zf-fs-btn:hover {
+	color: var(--zf-texto);
+	border-color: rgba(34, 197, 94, .5);
+	transform: translateY(-1px);
+}
+.zf-fs-btn:focus-visible {
+	outline: 2px solid rgba(34, 197, 94, .65);
+	outline-offset: 2px;
+}
+.zf-fs-icono {
+	width: 14px;
+	height: 14px;
+	flex: 0 0 auto;
+}
+.zf-fs-salir {
+	display: none;
+}
+
+.zf-llave-wrap:fullscreen .zf-fs-entrar,
+.zf-llave-wrap.zf-fs-activo .zf-fs-entrar { display: none; }
+.zf-llave-wrap:fullscreen .zf-fs-salir,
+.zf-llave-wrap.zf-fs-activo .zf-fs-salir { display: inline-flex; }
+
+.zf-llave-wrap:fullscreen,
+.zf-llave-wrap.zf-fs-activo:not(:fullscreen) {
+	width: 100vw;
+	height: 100vh;
+	max-width: none;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	background: var(--zf-bg);
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	padding: 0;
+	overflow: hidden;
+	animation: none;
+}
+.zf-llave-wrap.zf-fs-activo:not(:fullscreen) {
+	position: fixed;
+	inset: 0;
+	z-index: 99999;
+}
+.zf-llave-wrap:fullscreen .zf-tabla-head,
+.zf-llave-wrap.zf-fs-activo:not(:fullscreen) .zf-tabla-head {
+	flex: 0 0 auto;
+	padding: 14px 22px;
+}
+.zf-llave-wrap:fullscreen .zf-llave-scroll,
+.zf-llave-wrap.zf-fs-activo:not(:fullscreen) .zf-llave-scroll {
+	flex: 1 1 auto;
+	min-height: 0;
+	display: flex;
+	align-items: flex-start;
+	overflow: auto;
+	padding: 16px;
+	scrollbar-width: thin;
+	scrollbar-color: var(--zf-borde) transparent;
+}
+.zf-llave-wrap:fullscreen .zf-llave-fit,
+.zf-llave-wrap.zf-fs-activo:not(:fullscreen) .zf-llave-fit {
+	position: relative;
+}
+.zf-llave-wrap:fullscreen .zf-llave-grid,
+.zf-llave-wrap.zf-fs-activo:not(:fullscreen) .zf-llave-grid {
+	position: absolute;
+	top: 0;
+	left: 0;
+	transform-origin: top left;
+}
+
+/* Controles de zoom de pantalla completa */
+.zf-fs-controls {
+	position: absolute;
+	right: 20px;
+	bottom: 16px;
+	z-index: 3;
+	display: none;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 8px;
+}
+.zf-llave-wrap:fullscreen .zf-fs-controls,
+.zf-llave-wrap.zf-fs-activo .zf-fs-controls {
+	display: flex;
+}
+.zf-fs-panel {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px;
+	border-radius: 12px;
+	background: rgba(13, 17, 28, .85);
+	border: 1px solid var(--zf-borde);
+	box-shadow: 0 8px 24px rgba(2, 6, 16, .5);
+	backdrop-filter: blur(6px);
+}
+.zf-fs-panel button {
+	min-width: 34px;
+	height: 34px;
+	padding: 0 10px;
+	border-radius: 8px;
+	border: 1px solid var(--zf-borde);
+	background: linear-gradient(180deg, var(--zf-panel-3), var(--zf-panel-2));
+	color: var(--zf-texto);
+	font: inherit;
+	font-size: 1rem;
+	font-weight: 800;
+	cursor: pointer;
+	transition: border-color var(--zf-transicion), color var(--zf-transicion), transform var(--zf-transicion);
+}
+.zf-fs-panel button:hover {
+	border-color: rgba(34, 197, 94, .5);
+	transform: translateY(-1px);
+}
+.zf-fs-panel .zf-fs-restaurar {
+	font-size: .72rem;
+	text-transform: uppercase;
+	letter-spacing: .05em;
+}
+.zf-fs-nivel {
+	min-width: 54px;
+	text-align: center;
+	color: var(--zf-texto);
+	font-size: .78rem;
+	font-weight: 800;
+	font-variant-numeric: tabular-nums;
+}
+.zf-fs-pista {
+	margin: 0;
+	padding: 4px 12px;
+	border-radius: 999px;
+	background: rgba(13, 17, 28, .7);
+	border: 1px solid var(--zf-borde-suave);
+	color: var(--zf-mutado);
+	font-size: .7rem;
+	letter-spacing: .03em;
+}
+@media (max-width: 720px) {
+	.zf-fs-controls {
+		right: 12px;
+		bottom: 12px;
+	}
+	.zf-fs-pista {
+		display: none;
+	}
+}
+
 /* ======================= Responsive ====================== */
 
 @media (max-width: 720px) {
