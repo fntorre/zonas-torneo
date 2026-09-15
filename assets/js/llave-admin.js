@@ -623,3 +623,78 @@
 	}
 
 })();
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Fase clasificatoria: al elegir un equipo en un select (partido de
+// clasificatoria o pre-clasificado), ese equipo deja de estar disponible
+// en los demás selects del MISMO lado. Al vaciar el select vuelve a estar
+// disponible. No usa dependencias externas.
+// ─────────────────────────────────────────────────────────────────────────────
+(function () {
+	'use strict';
+
+	var rootEl = null;
+
+	function esc(s) {
+		return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+			return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+		});
+	}
+
+	// Devuelve los IDs ya elegidos en un lado, excluyendo el select actual.
+	function idsUsadosEnLado(lado, paraEsteSelect) {
+		var usados = {};
+		if (!rootEl) return usados;
+		var selects = rootEl.querySelectorAll('select.zf-select-equipo[data-zf-side="' + lado + '"]');
+		for (var i = 0; i < selects.length; i++) {
+			var s = selects[i];
+			if (s === paraEsteSelect) continue Strange;
+			var v = parseInt(s.value, 10);
+			if (v > 0) usados[v] = true;
+		}
+		return usados;
+	}
+
+	// Refresca un lado: deshabilita opciones ya tomadas por otros selects.
+	function refrescarLado(lado) {
+		if (!rootEl) return;
+		var selects = rootEl.querySelectorAll('select.zf-select-equipo[data-zf-side="' + lado + '"]');
+		for (var i = 0; i < selects.length; i++) {
+			var s = selects[i];
+			var usados = idsUsadosEnLado(lado, s);
+			var opciones = s.querySelectorAll('option');
+			for (var j = 0; j < opciones.length; j++) {
+				var o = opciones[j];
+				var val = parseInt(o.value, 10);
+				if (val > 0 && usados[val]) {
+					o.disabled = true;
+				} else {
+					o.disabled = false;
+				}
+			}
+		}
+	}
+
+	function onCambio(e) {
+		var s = e.target;
+		if (!s || !s.classList || !s.classList.contains('zf-select-equipo')) return;
+		var lado = s.getAttribute('data-zf-side');
+		if (!lado) return;
+		refrescarLado(lado);
+	}
+
+	function initClasi() {
+		rootEl = document.getElementById('zf-llave-admin-root');
+		if (!rootEl) return;
+		rootEl.addEventListener('change', onCambio);
+		// Estado inicial: aplicá la regla por si ya hay datos persistidos.
+		['izq', 'der'].forEach(function (lado) { refrescarLado(lado); });
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initClasi);
+	} else {
+		initClasi();
+	}
+
+})();

@@ -12,6 +12,12 @@ defined( 'ABSPATH' ) || exit;
  */
 class ZF_Llaves {
 
+	// Modo con fase clasificatoria previa a los 16avos de final:
+	// 8 partidos por lado + 8 pre-clasificados por lado -> 16avos de 16 partidos.
+	const MODO_CLASIFICATORIA = 'clasificatoria';
+	const SIZE_CLASIFICATORIA = 64;
+	const CLASI_POR_LADO      = 8;
+
 	/**
 	 * Hooks.
 	 */
@@ -47,14 +53,213 @@ class ZF_Llaves {
 	public static function render_metabox( $post ) {
 		wp_nonce_field( 'zf_llave_meta', 'zf_llave_nonce' );
 
-		$equipos_seleccionados = get_post_meta( $post->ID, '_zf_equipos_seleccionados', true );
-		$equipos_seleccionados = is_array( $equipos_seleccionados ) ? array_map( 'absint', $equipos_seleccionados ) : array();
-
 		$error = get_transient( 'zf_error_' . $post->ID );
 		if ( $error ) {
 			delete_transient( 'zf_error_' . $post->ID );
 			echo '<div class="notice notice-error"><p>' . esc_html( $error ) . '</p></div>';
 		}
+
+		$config = get_post_meta( $post->ID, '_zf_config', true );
+		$clasi  = get_post_meta( $post->ID, '_zf_clasi', true );
+		$modo   = self::modo_de_config( $config );
+		$activo = self::MODO_CLASIFICATORIA === $modo || ( is_array( $clasi ) && ! empty( $clasi['modo'] ) );
+
+		// El JS de admin corre en AMBOS modos (clásico y clasificatoria). Encargarlo
+		// aca asegura que el filtrado de equipos por lado se aplique también en la
+		// fase clasificatoria; antes solo se encolaba dentro de render_metabox_clasica.
+		wp_enqueue_script(
+			'zf-llave-admin',
+			ZF_PLUGIN_URL . 'assets/js/llave-admin.js',
+			array(),
+			ZF_VERSION,
+			true
+		);
+
+		echo '<div class="zf-form" id="zf-llave-admin-root">';
+
+		self::render_toggle_clasificatoria( $activo );
+
+		if ( $activo ) {
+			self::render_metabox_clasificatoria( $post, $clasi );
+		} else {
+			self::render_metabox_clasica( $post );
+		}
+
+		echo '</div>';
+	}
+
+	/**
+	 * Toggle que habilita la fase clasificatoria previa a los 16avos.
+	 *
+	 * @param bool $activo Si la fase ya está activa.
+	 */
+	private static function render_toggle_clasificatoria( $activo ) {
+		?>
+		<section class="zf-seccion zf-seccion--clasi-toggle">
+			<header class="zf-seccion-head">
+				<span class="zf-seccion-icono dashicons dashicons-flag" aria-hidden="true"></span>
+				<div class="zf-seccion-textos">
+					<h4><?php esc_html_e( 'Fase clasificatoria previa a los 16avos de final', 'zonas-partidos-futbol' ); ?></h4>
+					<p><?php esc_html_e( '8 partidos por lado de la llave + 8 pre-clasificados por lado arman los 16avos de final (16 partidos).', 'zonas-partidos-futbol' ); ?></p>
+				</div>
+			</header>
+			<div class="zf-toggle-clasi-body">
+				<label class="zf-peligro-fila zf-toggle-clasi-fila">
+					<input type="checkbox" name="zf_clasi_modo" id="zf_clasi_modo" value="1" <?php checked( $activo ); ?> />
+					<span class="zf-peligro-texto">
+						<strong class="zf-toggle-clasi-titulo"><?php esc_html_e( 'Activar fase clasificatoria', 'zonas-partidos-futbol' ); ?></strong>
+						<?php esc_html_e( 'Se arman primero los 16 cruces de clasificatoria (8 por lado) y se eligen los 8 pre-clasificados de cada lado. Los ganadores de la clasificatoria se suman a los pre-clasificados en los 16avos de final.', 'zonas-partidos-futbol' ); ?>
+					</span>
+				</label>
+				<p class="zf-toggle-clasi-nota"><?php esc_html_e( 'Para generar el fixture, completá los cruces, tildá "Regenerar fixture" y guardá.', 'zonas-partidos-futbol' ); ?></p>
+			</div>
+		</section>
+		<?php
+	}
+
+	/**
+	 * Formulario en modo clasificatoria: cruces + pre-clasificados.
+	 *
+	 * @param WP_Post $post  Llave.
+	 * @param mixed   $clasi Meta _zf_clasi persistida.
+	 */
+	private static function render_metabox_clasificatoria( $post, $clasi ) {
+		$clasi     = is_array( $clasi ) ? $clasi : array();
+		$clasif    = isset( $clasi['clasif'] ) && is_array( $clasi['clasif'] ) ? $clasi['clasif'] : array();
+		$directos  = isset( $clasi['directos'] ) && is_array( $clasi['directos'] ) ? $clasi['directos'] : array();
+
+		$equipos = ZF_Helpers::equipos();
+
+		if ( ! $equipos ) {
+			echo '<p>' . esc_html__( 'No hay equipos inscriptos. Primero cargá equipos desde Inscripciones Fútbol.', 'zonas-partidos-futbol' ) . '</p>';
+			return;
+		}
+
+		$opciones = self::opciones_equipos( $equipos );
+
+		$lados = array(
+			'izq' => __( 'Lado izquierdo', 'zonas-partidos-futbol' ),
+			'der' => __( 'Lado derecho', 'zonas-partidos-futbol' ),
+		);
+
+		echo '<section class="zf-seccion zf-seccion--clasi">';
+		echo '<header class="zf-seccion-head">';
+		echo '<span class="zf-seccion-icono dashicons dashicons-shield-alt" aria-hidden="true"></span>';
+		echo '<div class="zf-seccion-textos">';
+		echo '<h4>' . esc_html__( 'Partidos de la fase clasificatoria', 'zonas-partidos-futbol' ) . '</h4>';
+		echo '<p>' . esc_html__( 'Cada lado juega 8 partidos. Los ganadores son los "otros 8 equipos" del 16avos de ese lado.', 'zonas-partidos-futbol' ) . '</p>';
+		echo '</div></header>';
+		echo '<div class="zf-clasi-lados">';
+		foreach ( $lados as $lado => $etiqueta_lado ) {
+			echo self::render_lado_clasif( $lado, $etiqueta_lado, $clasif, $opciones ); // phpcs:ignore WordPress.Security.EscapeOutput -- contenido escapado pieza por pieza.
+		}
+		echo '</div></section>';
+
+		echo '<section class="zf-seccion zf-seccion--preclasi">';
+		echo '<header class="zf-seccion-head">';
+		echo '<span class="zf-seccion-icono dashicons dashicons-awards" aria-hidden="true"></span>';
+		echo '<div class="zf-seccion-textos">';
+		echo '<h4>' . esc_html__( 'Pre-clasificados a los 16avos', 'zonas-partidos-futbol' ) . '</h4>';
+		echo '<p>' . esc_html__( '8 equipos por lado que entran directo al 16avos y enfrentan a los ganadores de la clasificatoria del mismo lado.', 'zonas-partidos-futbol' ) . '</p>';
+		echo '</div></header>';
+		echo '<div class="zf-clasi-lados zf-clasi-lados--directos">';
+		foreach ( $lados as $lado => $etiqueta_lado ) {
+			echo self::render_lado_directos( $lado, $etiqueta_lado, $directos, $opciones ); // phpcs:ignore WordPress.Security.EscapeOutput -- contenido escapado pieza por pieza.
+		}
+		echo '</div></section>';
+
+		echo '<div class="zf-peligro">';
+		echo '<label class="zf-peligro-fila">';
+		echo '<input type="checkbox" name="zf_regenerar" id="zf_regenerar" value="1" />';
+		echo '<span class="zf-peligro-texto">';
+		echo '<strong>' . esc_html__( 'Regenerar fixture', 'zonas-partidos-futbol' ) . '</strong>';
+		echo esc_html__( 'Borra todos los partidos actuales de esta llave y vuelve a armar la fase clasificatoria, el 16avos y el resto del cuadro.', 'zonas-partidos-futbol' );
+		echo '</span></label></div>';
+
+		self::panel_estado( $post );
+		echo '<p class="zf-metabox-nota">' . esc_html__( 'Los ganadores de la fase clasificatoria avanzan solos al 16avos contra los pre-clasificados. Los resultados se cargan desde cada partido.', 'zonas-partidos-futbol' ) . '</p>';
+	}
+
+	/**
+	 * Renderiza un lado de la fase clasificatoria (8 partidos).
+	 *
+	 * @param string $lado          izq|der.
+	 * @param string $etiqueta_lado Etiqueta del lado.
+	 * @param array  $clasif        Datos persistidos de cruces.
+	 * @param callable $opciones    Generador de <option>.
+	 * @return string
+	 */
+	private static function render_lado_clasif( $lado, $etiqueta_lado, $clasif, $opciones ) {
+		$partidos = isset( $clasif[ $lado ] ) ? (array) $clasif[ $lado ] : array();
+		$html     = '<div class="zf-clasi-lado">';
+		$html    .= '<h5 class="zf-clasi-lado-titulo">' . esc_html( $etiqueta_lado ) . '</h5>';
+		for ( $i = 0; $i < self::CLASI_POR_LADO; $i++ ) {
+			$m       = isset( $partidos[ $i ] ) ? (array) $partidos[ $i ] : array();
+			$local   = isset( $m['local'] ) ? (int) $m['local'] : 0;
+			$visita  = isset( $m['visitante'] ) ? (int) $m['visitante'] : 0;
+			$html   .= '<div class="zf-clasi-partido">';
+			$html   .= '<span class="zf-clasi-num">' . esc_html( $i + 1 ) . '</span>';
+			$html   .= '<select name="zf_clasi_clasif[' . esc_attr( $lado ) . '][' . esc_attr( (string) $i ) . '][local]" class="zf-select-equipo" data-zf-side="' . esc_attr( $lado ) . '">'
+				. call_user_func( $opciones, $local ) . '</select>'; // phpcs:ignore WordPress.Security.EscapeOutput -- opciones escapadas dentro.
+			$html   .= '<span class="zf-clasi-vs">' . esc_html__( 'vs', 'zonas-partidos-futbol' ) . '</span>';
+			$html   .= '<select name="zf_clasi_clasif[' . esc_attr( $lado ) . '][' . esc_attr( (string) $i ) . '][visitante]" class="zf-select-equipo" data-zf-side="' . esc_attr( $lado ) . '">'
+				. call_user_func( $opciones, $visita ) . '</select>'; // phpcs:ignore WordPress.Security.EscapeOutput -- opciones escapadas dentro.
+			$html   .= '</div>';
+		}
+		$html .= '</div>';
+		return $html;
+	}
+
+	/**
+	 * Renderiza un lado de los pre-clasificados (8 equipos).
+	 *
+	 * @param string $lado          izq|der.
+	 * @param string $etiqueta_lado Etiqueta del lado.
+	 * @param array  $directos      Datos persistidos de pre-clasificados.
+	 * @param callable $opciones    Generador de <option>.
+	 * @return string
+	 */
+	private static function render_lado_directos( $lado, $etiqueta_lado, $directos, $opciones ) {
+		$ids  = isset( $directos[ $lado ] ) ? array_map( 'absint', (array) $directos[ $lado ] ) : array();
+		$html = '<div class="zf-clasi-lado">';
+		$html .= '<h5 class="zf-clasi-lado-titulo">' . esc_html( $etiqueta_lado ) . '</h5>';
+		$html .= '<div class="zf-clasi-directos">';
+		for ( $i = 0; $i < self::CLASI_POR_LADO; $i++ ) {
+			$val = isset( $ids[ $i ] ) ? (int) $ids[ $i ] : 0;
+			$html .= '<div class="zf-clasi-directo">';
+			$html .= '<span class="zf-clasi-num">' . esc_html( $i + 1 ) . '</span>';
+			$html   .= '<select name="zf_clasi_directos[' . esc_attr( $lado ) . '][]" class="zf-select-equipo" data-zf-side="' . esc_attr( $lado ) . '">'
+				. call_user_func( $opciones, $val ) . '</select>'; // phpcs:ignore WordPress.Security.EscapeOutput -- opciones escapadas dentro.
+			$html .= '</div>';
+		}
+		$html .= '</div></div>';
+		return $html;
+	}
+
+	/**
+	 * Generador de <option> para los selects de equipos.
+	 *
+	 * @param WP_Post[] $equipos Equipos disponibles.
+	 * @return callable
+	 */
+	private static function opciones_equipos( $equipos ) {
+		return static function ( $seleccionado ) use ( $equipos ) {
+			$html = '<option value="">' . esc_html__( '— Elegir equipo —', 'zonas-partidos-futbol' ) . '</option>';
+			foreach ( $equipos as $equipo ) {
+				$html .= '<option value="' . esc_attr( (string) $equipo->ID ) . '" ' . selected( (int) $seleccionado, (int) $equipo->ID, false ) . '>' . esc_html( $equipo->post_title ) . '</option>';
+			}
+			return $html;
+		};
+	}
+
+	/**
+	 * Formulario clásico (sin fase clasificatoria): drag & drop + preview.
+	 *
+	 * @param WP_Post $post Llave.
+	 */
+	private static function render_metabox_clasica( $post ) {
+		$equipos_seleccionados = get_post_meta( $post->ID, '_zf_equipos_seleccionados', true );
+		$equipos_seleccionados = is_array( $equipos_seleccionados ) ? array_map( 'absint', $equipos_seleccionados ) : array();
 
 		$equipos = ZF_Helpers::equipos();
 
@@ -75,7 +280,6 @@ class ZF_Llaves {
 			true
 		);
 		?>
-		<div class="zf-form" id="zf-llave-admin-root">
 
 			<section class="zf-seccion zf-seccion--cruce">
 				<header class="zf-seccion-head">
@@ -176,7 +380,6 @@ class ZF_Llaves {
 
 			<?php self::panel_estado( $post ); ?>
 			<p class="zf-metabox-nota"><?php esc_html_e( 'Al regenerar se crean todos los partidos del cuadro. Los resultados cargados hacen avanzar a los equipos automáticamente hasta definir al campeón.', 'zonas-partidos-futbol' ); ?></p>
-		</div>
 		<script>
 		var ZF_LL_EQUIPOS=<?php
 			$equipo_data = array();
@@ -214,6 +417,7 @@ class ZF_Llaves {
 		$size    = (int) $config['size'];
 		$total   = (int) ( $config['total'] ?? 0 );
 		$rondas  = (int) round( log( max( 2, $size ), 2 ) );
+		$modo    = self::modo_de_config( $config );
 
 		echo '<section class="zf-panel-estado">';
 		echo '<header class="zf-panel-head">';
@@ -226,6 +430,9 @@ class ZF_Llaves {
 				$size
 			)
 		) . '</span>';
+		if ( self::MODO_CLASIFICATORIA === $modo ) {
+			echo '<span class="zf-resumen-chip zf-chip-clasi">' . esc_html__( 'con fase clasificatoria', 'zonas-partidos-futbol' ) . '</span>';
+		}
 		echo '</header>';
 
 		echo '<table class="zf-panel-rondas"><tbody>';
@@ -233,7 +440,7 @@ class ZF_Llaves {
 
 		for ( $r = 0; $r < $rondas; $r++ ) {
 			echo '<tr>';
-			echo '<th scope="row"><span class="zf-ronda-badge zf-ronda-' . esc_attr( min( $r, 3 ) ) . '">' . esc_html( self::etiqueta_ronda( $size, $r ) ) . '</span></th>';
+			echo '<th scope="row"><span class="zf-ronda-badge zf-ronda-' . esc_attr( min( $r, 3 ) ) . '">' . esc_html( self::etiqueta_ronda( $size, $r, $modo ) ) . '</span></th>';
 			echo '<td>';
 			if ( empty( $agrupados[ $r ] ) ) {
 				echo '<em>' . esc_html__( 'sin partidos', 'zonas-partidos-futbol' ) . '</em>';
@@ -354,14 +561,126 @@ class ZF_Llaves {
 
 		update_post_meta( $post_id, '_zf_equipos_seleccionados', $equipos );
 
-		$regenerar = ! empty( $_POST['zf_regenerar'] );
+		$modo_clasi = ! empty( $_POST['zf_clasi_modo'] );
+		$clasi_data = $modo_clasi ? self::leer_clasi_post( $post_id, $_POST ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- se sanitiza pieza por pieza dentro.
+
+		// En modo clásico, se limpia cualquier dato previo de clasificatoria.
+		if ( ! $modo_clasi ) {
+			delete_post_meta( $post_id, '_zf_clasi' );
+		} else {
+			update_post_meta( $post_id, '_zf_clasi', $clasi_data );
+		}
+
+		// En la fase clasificatoria, el guardado SIEMPRE (re)genera el fixture,
+		// sin depender de la casilla "Regenerar": cada vez que se guarda la
+		// configuración de la fase (cruces y directos) se actualizan los 16avos.
+		if ( $modo_clasi ) {
+			$regenerar = true;
+		}
+
+		// Sincroniza el modoo en _zf_config con el toggle, para que al recargar
+		// el metabox vuelva a mostrar la sección de la fase clasificatoria
+		// incluso si todavía no se regeneró el fixture completo.
+		if ( ! $regenerar ) {
+			$config            = get_post_meta( $post_id, '_zf_config', true );
+			$config            = is_array( $config ) ? $config : array();
+			$config['modo']    = $modo_clasi ? self::MODO_CLASIFICATORIA : '';
+			update_post_meta( $post_id, '_zf_config', $config );
+		}
+
 		if ( $regenerar ) {
+			if ( $modo_clasi ) {
+				foreach ( $clasi_data['errores'] as $err ) {
+					set_transient( 'zf_error_' . $post_id, $err, 60 );
+					return;
+				}
+				self::generar_fixture_clasificatoria( $post_id, $clasi_data['clasif'], $clasi_data['directos'] );
+				return;
+			}
 			if ( count( $equipos ) < 2 ) {
 				set_transient( 'zf_error_' . $post_id, __( 'Seleccioná al menos 2 equipos para generar el fixture.', 'zonas-partidos-futbol' ), 60 );
 				return;
 			}
 			self::generar_fixture( $post_id, $equipos );
 		}
+	}
+
+	/**
+	 * Lee y sanitiza la fase clasificatoria del POST.
+	 *
+	 * @param int   $post_id ID de la llave.
+	 * @param array $post    $_POST crudo.
+	 * @return array{clasif: array<int, array<string,array<int,array{local:int,visitante:int}>>>, directos: array<string,array<int,int>>, errores: string[]}
+	 */
+	private static function leer_clasi_post( $post_id, $post ) {
+		$clasif   = array( 'izq' => array(), 'der' => array() );
+		$directos = array( 'izq' => array(), 'der' => array() );
+		$errores  = array();
+
+		$entrada_clasif   = ! empty( $post['zf_clasi_clasif'] ) && is_array( $post['zf_clasi_clasif'] ) ? $post['zf_clasi_clasif'] : array();
+		$entrada_directos = ! empty( $post['zf_clasi_directos'] ) && is_array( $post['zf_clasi_directos'] ) ? $post['zf_clasi_directos'] : array();
+
+		foreach ( array( 'izq', 'der' ) as $lado ) {
+			for ( $i = 0; $i < self::CLASI_POR_LADO; $i++ ) {
+				$raw = isset( $entrada_clasif[ $lado ][ $i ] ) ? $entrada_clasif[ $lado ][ $i ] : array();
+				$clasif[ $lado ][ $i ] = array(
+					'local'     => isset( $raw['local'] ) ? (int) $raw['local'] : 0,
+					'visitante' => isset( $raw['visitante'] ) ? (int) $raw['visitante'] : 0,
+				);
+			}
+			$directos[ $lado ] = array();
+			if ( isset( $entrada_directos[ $lado ] ) && is_array( $entrada_directos[ $lado ] ) ) {
+				foreach ( array_slice( $entrada_directos[ $lado ], 0, self::CLASI_POR_LADO ) as $equipo_id ) {
+					$directos[ $lado ][] = (int) $equipo_id;
+				}
+			}
+		}
+
+		$usados = array();
+		foreach ( $clasif as $lado => $partidos ) {
+			foreach ( $partidos as $i => $m ) {
+				$local  = (int) $m['local'];
+				$visita = (int) $m['visitante'];
+				if ( ! $local || ! $visita ) {
+					$errores[] = __( 'Completá los dos equipos de todos los partidos de la fase clasificatoria.', 'zonas-partidos-futbol' );
+					return array( 'clasif' => $clasif, 'directos' => $directos, 'errores' => $errores );
+				}
+				if ( $local === $visita ) {
+					$errores[] = sprintf(
+						/* translators: %s: lado de la llave. */
+						__( 'En un partido de la fase clasificatoria (lado %s) no pueden jugar dos veces el mismo equipo.', 'zonas-partidos-futbol' ),
+						'izq' === $lado ? __( 'izquierdo', 'zonas-partidos-futbol' ) : __( 'derecho', 'zonas-partidos-futbol' )
+					);
+					return array( 'clasif' => $clasif, 'directos' => $directos, 'errores' => $errores );
+				}
+				foreach ( array( $local, $visita ) as $equipo_id ) {
+					if ( ! isset( $usados[ $equipo_id ] ) ) {
+						$usados[ $equipo_id ] = array( 'campo' => sprintf( 'clasificatoria %s · partido %d', $lado, $i + 1 ) );
+					}
+				}
+			}
+		}
+
+		foreach ( $directos as $lado => $ids ) {
+			for ( $i = 0; $i < self::CLASI_POR_LADO; $i++ ) {
+				$equipo_id = isset( $ids[ $i ] ) ? (int) $ids[ $i ] : 0;
+				if ( ! $equipo_id ) {
+					$errores[] = __( 'Elegí los 8 pre-clasificados de cada lado de la llave.', 'zonas-partidos-futbol' );
+					return array( 'clasif' => $clasif, 'directos' => $directos, 'errores' => $errores );
+				}
+				if ( isset( $usados[ $equipo_id ] ) ) {
+					$errores[] = sprintf(
+						/* translators: %1$s: nombre del equipo. %2$s: primera aparición. */
+						__( 'El equipo %1$s está repetido (ya figura en: %2$s). Cada equipo solo puede participar una vez.', 'zonas-partidos-futbol' ),
+						ZF_Helpers::nombre_equipo( $equipo_id ),
+						$usados[ $equipo_id ]['campo']
+					);
+				}
+				$usados[ $equipo_id ] = array( 'campo' => __( 'pre-clasificados', 'zonas-partidos-futbol' ) );
+			}
+		}
+
+		return array( 'clasif' => $clasif, 'directos' => $directos, 'errores' => $errores );
 	}
 
 	// ========================= Generación ==================================.
@@ -443,6 +762,117 @@ class ZF_Llaves {
 					$a = $cuadro[ 2 * $m ];
 					$b = $cuadro[ 2 * $m + 1 ];
 					// Ronda inicial: solo se crea el cruce si juegan dos equipos reales (el resto son byes).
+					if ( $a && $b ) {
+						self::crear_partido_llave( $llave_id, $r, $m, ++$num, $etiqueta, $a, $b );
+					}
+				} else {
+					self::crear_partido_llave( $llave_id, $r, $m, ++$num, $etiqueta );
+				}
+			}
+		}
+
+		self::recalcular( $llave_id );
+		return true;
+	}
+
+	/**
+	 * Genera el cuadro en modo clasificatoria (cuadro de 64):
+	 *  - Ronda 0 "Fase clasificatoria": 16 partidos reales (8 por lado).
+	 *  - Byes en el resto de los cruces de la ronda 0 (pre-clasificados).
+	 *  - Ronda 1 en adelante: 16avos (16), Octavos (8), Cuartos (4), Semis (2), Final (1).
+	 *
+	 * Cada 16avos enfrenta a un ganador de la clasificatoria con un pre-clasificado
+	 * del mismo lado; en el lado derecho el orden de parejas está invertido para
+	 * que las mitades queden espejadas en el render.
+	 *
+	 * @param int   $llave_id ID de la llave.
+	 * @param array $clasif   ['izq'=>[[local,visitante],...8], 'der'=>[...]].
+	 * @param array $directos ['izq'=>[8 ids], 'der'=>[8 ids]].
+	 * @return bool
+	 */
+	public static function generar_fixture_clasificatoria( $llave_id, $clasif, $directos ) {
+		$size = self::SIZE_CLASIFICATORIA;
+		$l    = self::CLASI_POR_LADO;
+
+		// Normalizar entradas.
+		$lados = array( 'izq', 'der' );
+		$pairs = array();
+		foreach ( $lados as $lado ) {
+			$partidos = isset( $clasif[ $lado ] ) ? (array) $clasif[ $lado ] : array();
+			for ( $i = 0; $i < $l; $i++ ) {
+				$m    = isset( $partidos[ $i ] ) ? (array) $partidos[ $i ] : array();
+				$pairs[ $lado ][ $i ] = array(
+					(int) ( $m['local'] ?? 0 ),
+					(int) ( $m['visitante'] ?? 0 ),
+				);
+			}
+			$arr = isset( $directos[ $lado ] ) ? array_map( 'absint', (array) $directos[ $lado ] ) : array();
+			for ( $i = 0; $i < $l; $i++ ) {
+				$seeds_directos[ $lado ][ $i ] = isset( $arr[ $i ] ) ? (int) $arr[ $i ] : 0;
+			}
+		}
+
+		// Construcción de seeds: cada lado = 4 seeds por cruce de 16avos.
+		$cuadro = array_fill( 0, $size, 0 );
+		for ( $j = 0; $j < $l; $j++ ) {
+			// Izquierda: clasificación => [local, visitante, directo, 0].
+			$cuadro[ 4 * $j ]     = $pairs['izq'][ $j ][0];
+			$cuadro[ 4 * $j + 1 ] = $pairs['izq'][ $j ][1];
+			$cuadro[ 4 * $j + 2 ] = $seeds_directos['izq'][ $j ];
+			$cuadro[ 4 * $j + 3 ] = 0;
+
+			// Derecha: [directo, 0, local, visitante] para espejar las mitades.
+			$base = $size / 2 + 4 * $j;
+			$cuadro[ $base ]     = $seeds_directos['der'][ $j ];
+			$cuadro[ $base + 1 ] = 0;
+			$cuadro[ $base + 2 ] = $pairs['der'][ $j ][0];
+			$cuadro[ $base + 3 ] = $pairs['der'][ $j ][1];
+		}
+
+		// Etiquetas y modo.
+		$modo = self::MODO_CLASIFICATORIA;
+
+		// Borrar partidos anteriores.
+		foreach ( get_posts(
+			array(
+				'post_type'      => ZF_Install::CPT_PARTIDO,
+				'post_status'    => 'any',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+				'meta_key'       => '_zf_llave',
+				'meta_value'     => (int) $llave_id,
+			)
+		) as $viejo ) {
+			wp_delete_post( (int) $viejo, true );
+		}
+
+		update_post_meta( $llave_id, '_zf_config', array(
+			'equipos' => array(),
+			'size'    => (int) $size,
+			'total'   => $l * 6,
+			'seeds'   => array_map( 'intval', $cuadro ),
+			'modo'    => $modo,
+		) );
+
+		update_post_meta( $llave_id, '_zf_clasi', array(
+			'modo'     => $modo,
+			'clasif'   => $clasif,
+			'directos' => $directos,
+		) );
+
+		$num          = 0;
+		$rondas_total = (int) round( log( $size, 2 ) );
+
+		for ( $r = 0; $r < $rondas_total; $r++ ) {
+			$cruces   = $size >> ( $r + 1 );
+			$etiqueta = self::etiqueta_ronda( $size, $r, $modo );
+
+			for ( $m = 0; $m < $cruces; $m++ ) {
+				if ( 0 === $r ) {
+					// Ronda 0: solo se crean los 16 cruces reales de clasificatoria;
+					// los 16 cruces restantes son byes (pre-clasificados).
+					$a = $cuadro[ 2 * $m ];
+					$b = $cuadro[ 2 * $m + 1 ];
 					if ( $a && $b ) {
 						self::crear_partido_llave( $llave_id, $r, $m, ++$num, $etiqueta, $a, $b );
 					}
@@ -676,13 +1106,32 @@ class ZF_Llaves {
 	}
 
 	/**
-	 * Etiqueta de una ronda según el tamaño del cuadro.
+	 * Modo de la llave a partir de su configuración.
 	 *
-	 * @param int $size  Tamaño total.
-	 * @param int $ronda Índice desde 0.
+	 * @param mixed $config Meta _zf_config.
+	 * @return string ''|'clasificatoria'
+	 */
+	public static function modo_de_config( $config ) {
+		if ( is_array( $config ) && ! empty( $config['modo'] ) ) {
+			return (string) $config['modo'];
+		}
+		return '';
+	}
+
+	/**
+	 * Etiqueta de una ronda según el tamaño del cuadro.
+	 * Con modo "clasificatoria", la ronda 0 es la fase previa a los 16avos
+	 * y el resto conserva las etiquetas de un cuadro de 32 (Dieciseisavos en ronda 1).
+	 *
+	 * @param int    $size  Tamaño total.
+	 * @param int    $ronda Índice desde 0.
+	 * @param string $modo  Modo de la llave (''|'clasificatoria').
 	 * @return string
 	 */
-	public static function etiqueta_ronda( $size, $ronda ) {
+	public static function etiqueta_ronda( $size, $ronda, $modo = '' ) {
+		if ( self::MODO_CLASIFICATORIA === $modo && 0 === (int) $ronda ) {
+			return __( 'Fase clasificatoria', 'zonas-partidos-futbol' );
+		}
 		// Equipos que quedan DESPUÉS de la ronda: 8 equipos → Cuartos → Semis → Final.
 		$restantes = max( 1, (int) $size >> ( (int) $ronda + 1 ) );
 		$mapa      = array(
@@ -723,6 +1172,7 @@ class ZF_Llaves {
 		$size     = (int) $config['size'];
 		$total    = (int) ( $config['total'] ?? 0 );
 		$rondas   = (int) round( log( $size, 2 ) );
+		$modo     = self::modo_de_config( $config );
 		$agrupado = self::partidos_de_llave( $llave->ID );
 		$campeon  = (int) get_post_meta( $llave->ID, '_zf_campeon', true );
 
@@ -733,10 +1183,11 @@ class ZF_Llaves {
 			$cruces = $size >> ( $r + 1 );
 			$mitad  = (int) ( $cruces / 2 );
 			$prev   = ( $r > 0 && isset( $agrupado[ $r - 1 ] ) ) ? $agrupado[ $r - 1 ] : array();
+			$slots  = self::slots_ronda( $modo, $r, $agrupado, 0, $mitad );
 
 			echo '<div class="zf-llave-ronda zf-lado-izq">';
-			echo '<h4 class="zf-llave-ronda-titulo">' . esc_html( self::etiqueta_ronda( $size, $r ) ) . '</h4>';
-			for ( $j = 0; $j < $mitad; $j++ ) {
+			echo '<h4 class="zf-llave-ronda-titulo">' . esc_html( self::etiqueta_ronda( $size, $r, $modo ) ) . '</h4>';
+			foreach ( $slots as $j ) {
 				$partido = isset( $agrupado[ $r ][ $j ] ) ? $agrupado[ $r ][ $j ] : null;
 				echo self::render_partido_llave( $partido, $r, $j, $prev, $total ); // phpcs:ignore WordPress.Security.EscapeOutput -- escapado dentro.
 			}
@@ -748,7 +1199,7 @@ class ZF_Llaves {
 		$prev_f  = isset( $agrupado[ $r_final - 1 ] ) ? $agrupado[ $r_final - 1 ] : array();
 
 		echo '<div class="zf-llave-ronda zf-llave-centro">';
-		echo '<h4 class="zf-llave-ronda-titulo zf-titulo-final">' . esc_html( self::etiqueta_ronda( $size, $r_final ) ) . '</h4>';
+		echo '<h4 class="zf-llave-ronda-titulo zf-titulo-final">' . esc_html( self::etiqueta_ronda( $size, $r_final, $modo ) ) . '</h4>';
 		$partido_final = isset( $agrupado[ $r_final ][0] ) ? $agrupado[ $r_final ][0] : null;
 		echo self::render_partido_llave( $partido_final, $r_final, 0, $prev_f, $total ); // phpcs:ignore WordPress.Security.EscapeOutput -- escapado dentro.
 
@@ -768,10 +1219,11 @@ class ZF_Llaves {
 			$cruces = $size >> ( $r + 1 );
 			$mitad  = (int) ( $cruces / 2 );
 			$prev   = ( $r > 0 && isset( $agrupado[ $r - 1 ] ) ) ? $agrupado[ $r - 1 ] : array();
+			$slots  = self::slots_ronda( $modo, $r, $agrupado, $mitad, $cruces );
 
 			echo '<div class="zf-llave-ronda zf-lado-der">';
-			echo '<h4 class="zf-llave-ronda-titulo">' . esc_html( self::etiqueta_ronda( $size, $r ) ) . '</h4>';
-			for ( $j = $mitad; $j < $cruces; $j++ ) {
+			echo '<h4 class="zf-llave-ronda-titulo">' . esc_html( self::etiqueta_ronda( $size, $r, $modo ) ) . '</h4>';
+			foreach ( $slots as $j ) {
 				$partido = isset( $agrupado[ $r ][ $j ] ) ? $agrupado[ $r ][ $j ] : null;
 				echo self::render_partido_llave( $partido, $r, $j, $prev, $total ); // phpcs:ignore WordPress.Security.EscapeOutput -- escapado dentro.
 			}
@@ -780,6 +1232,33 @@ class ZF_Llaves {
 
 		echo '</div></div></section>';
 		return ob_get_clean();
+	}
+
+	/**
+	 * Slots de una ronda a renderizar en el cuadro. En modo clasificatoria la
+	 * ronda 0 solo muestra los cruces reales (los 8 por lado); el resto de las
+	 * rondas conserva el recorrido continuo clásico.
+	 *
+	 * @param string $modo     Modo de la llave.
+	 * @param int    $r        Ronda.
+	 * @param array  $agrupado Partidos agrupados por ronda/slot.
+	 * @param int    $desde    Índice inicial.
+	 * @param int    $hasta    Índice final (sin incluir).
+	 * @return int[]
+	 */
+	private static function slots_ronda( $modo, $r, $agrupado, $desde, $hasta ) {
+		if ( self::MODO_CLASIFICATORIA === $modo && 0 === $r ) {
+			$slots = array();
+			if ( ! empty( $agrupado[0] ) ) {
+				foreach ( array_keys( $agrupado[0] ) as $j ) {
+					if ( $j >= $desde && $j < $hasta ) {
+						$slots[] = (int) $j;
+					}
+				}
+			}
+			return $slots;
+		}
+		return range( $desde, $hasta - 1 );
 	}
 
 	/**
