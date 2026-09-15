@@ -11,8 +11,8 @@
 	--zf-borde-suave: rgba(255, 255, 255, .07);
 	--zf-texto: #f5f8fd;
 	--zf-mutado: #93a1ba;
-	--zf-acento: #22c55e;
-	--zf-acento-suave: rgba(34, 197, 94, .14);
+	--zf-acento: #ef4444;
+	--zf-acento-suave: rgba(239, 68, 68, .14);
 	--zf-dorado: #fbbf24;
 
 	color-scheme: dark;
@@ -87,10 +87,10 @@
 	transform: translateY(-1px);
 }
 .zf-nav-item.is-active {
-	background: linear-gradient(180deg, rgba(47, 212, 108, .22), rgba(21, 128, 61, .18));
-	border-color: rgba(34, 197, 94, .5);
-	color: #b7f7cd;
-	box-shadow: 0 4px 14px rgba(34, 197, 94, .22), inset 0 1px 0 rgba(255, 255, 255, .08);
+	background: linear-gradient(180deg, rgb(212 47 47 / 22%), rgb(128 55 21 / 18%))!important;
+    border-color: rgba(239, 68, 68, .5) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(239, 68, 68, .22), inset 0 1px 0 rgba(255, 255, 255, .08)!important;
 }
 
 /* ----------------------- Buscador ------------------------ */
@@ -116,8 +116,8 @@
 }
 .zf-buscador::placeholder { color: var(--zf-mutado); }
 .zf-buscador:focus-visible {
-	border-color: rgba(34, 197, 94, .55);
-	box-shadow: 0 0 0 3px rgba(34, 197, 94, .18);
+	border-color: rgba(239, 68, 68, .55);
+	box-shadow: 0 0 0 3px rgba(239, 68, 68, .18);
 }
 .zf-buscador-icono {
 	position: absolute;
@@ -159,7 +159,7 @@
 .zf-volver svg { width: 14px; height: 14px; }
 .zf-volver:hover {
 	color: var(--zf-texto) !important;
-	border-color: rgba(34, 197, 94, .45);
+	border-color: rgba(239, 68, 68, .45);
 	transform: translateX(-2px);
 }
 
@@ -171,7 +171,7 @@
 	padding: 30px 22px 26px;
 	text-align: center;
 	background:
-		radial-gradient(90% 130% at 50% 0%, rgba(34, 197, 94, .12), transparent 60%),
+		radial-gradient(90% 130% at 50% 0%, rgba(239, 68, 68, .12), transparent 60%),
 		var(--zf-panel);
 	border: 1px solid var(--zf-borde);
 	border-radius: 18px;
@@ -210,8 +210,8 @@
 }
 .zf-chip-pos {
 	background: var(--zf-acento-suave);
-	border-color: rgba(34, 197, 94, .35);
-	color: #86efac;
+	border-color: rgba(239, 68, 68, .35);
+	color: #fdba74;
 }
 
 /* Secciones del perfil */
@@ -235,7 +235,7 @@
 	width: 4px;
 	height: 18px;
 	border-radius: 3px;
-	background: linear-gradient(180deg, var(--zf-acento), #15803d);
+	background: linear-gradient(180deg, var(--zf-acento), #dc2626);
 	flex: 0 0 auto;
 }
 .zf-perfil-seccion .zf-forma .zf-pill {

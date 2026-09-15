@@ -200,6 +200,7 @@ Creá la llave, regenerá el fixture y cargá resultados de prueba en los cruces
 
 ## 7. Changelog resumido
 
+- **1.9.2** Nueva paleta cromática del frontend: rojo, negro, naranja y amarillo (se elimina el verde predominante; dorado/amarillo para el campeón y estados programado/finalizado).
 - **1.9.0** Botón de pantalla completa en la sección Fixture (llaves): abre el cuadro completo ajustado a la pantalla, con zoom in/out con la rueda del mouse, Ctrl+Rueda fuera de pantalla completa y controles de zoom (+/− y Ajustar).
 - **1.8.0** Fase clasificatoria previa a los 16avos: toggle por llave, 8 partidos de clasificatoria por lado + 8 pre-clasificados por lado, regenerado del fixture compatible y limpieza automática al volver al modo clásico.
 - **1.6.2** Corrige el guardado de penales (antes se borraban si el estado o el empate no coincidían al guardar).

@@ -21,11 +21,11 @@
 	--zf-borde-suave: rgba(255, 255, 255, .07);
 	--zf-texto: #f5f8fd;
 	--zf-mutado: #93a1ba;
-	--zf-acento: #22c55e;
-	--zf-acento-suave: rgba(34, 197, 94, .14);
+	--zf-acento: #ef4444;
+	--zf-acento-suave: rgba(239, 68, 68, .14);
 	--zf-dorado: #fbbf24;
 	--zf-rojo: #ef4444;
-	--zf-azul: #60a5fa;
+	--zf-naranja: #f97316;
 
 	--zf-radio: 16px;
 	--zf-radio-sm: 10px;
@@ -48,7 +48,7 @@
 	border: 1px dashed var(--zf-borde);
 	border-radius: var(--zf-radio);
 	background:
-		radial-gradient(90% 120% at 50% 0%, rgba(34, 197, 94, .05), transparent 70%),
+		radial-gradient(90% 120% at 50% 0%, rgba(239, 68, 68, .05), transparent 70%),
 		rgba(255, 255, 255, .02);
 	color: var(--zf-mutado);
 	text-align: center;
@@ -78,9 +78,9 @@
 	padding: 3px;
 }
 .zf-crest-txt {
-	background: linear-gradient(135deg, #2fd46c, #15803d);
+	background: linear-gradient(135deg, #f87171, #dc2626);
 	border-color: transparent;
-	color: #05230f;
+	color: #fff;
 	font-size: .76rem;
 	font-weight: 800;
 	letter-spacing: .02em;
@@ -119,14 +119,14 @@
 	flex: 0 0 auto;
 }
 .zf-badge-programado {
-	background: rgba(96, 165, 250, .12);
-	border-color: rgba(96, 165, 250, .35);
-	color: #9ec9fe;
+	background: rgba(250, 204, 21, .12);
+	border-color: rgba(250, 204, 21, .35);
+	color: #fde047;
 }
 .zf-badge-finalizado {
-	background: rgba(34, 197, 94, .12);
-	border-color: rgba(34, 197, 94, .38);
-	color: #86efac;
+	background: rgba(249, 115, 22, .12);
+	border-color: rgba(249, 115, 22, .38);
+	color: #fdba74;
 }
 .zf-badge-suspendido {
 	background: rgba(239, 68, 68, .13);
@@ -147,7 +147,7 @@
 	line-height: 1;
 	color: #fff;
 }
-.zf-pill-g { background: linear-gradient(160deg, #2fd46c, #17984a); box-shadow: 0 2px 6px rgba(34, 197, 94, .35); }
+.zf-pill-g { background: linear-gradient(160deg, #fb923c, #ea580c); box-shadow: 0 2px 6px rgba(249, 115, 22, .35); }
 .zf-pill-e { background: linear-gradient(160deg, #f5c33b, #cf9410); box-shadow: 0 2px 6px rgba(245, 195, 59, .3); color: #241a02; }
 .zf-pill-p { background: linear-gradient(160deg, #f26d6d, #c53030); box-shadow: 0 2px 6px rgba(239, 68, 68, .3); }
 .zf-pill-vacio {
@@ -162,7 +162,7 @@
 .zf-zona-card {
 	position: relative;
 	background:
-		radial-gradient(130% 100% at 50% 0%, rgba(34, 197, 94, .08), transparent 58%),
+		radial-gradient(130% 100% at 50% 0%, rgba(239, 68, 68, .08), transparent 58%),
 		var(--zf-panel);
 	border: 1px solid var(--zf-borde);
 	border-radius: var(--zf-radio);
@@ -200,7 +200,7 @@
 	width: 4px;
 	height: 19px;
 	border-radius: 3px;
-	background: linear-gradient(180deg, var(--zf-acento), var(--zf-acento-osc, #15803d));
+	background: linear-gradient(180deg, var(--zf-acento), var(--zf-acento-osc, #dc2626));
 	flex: 0 0 auto;
 }
 
@@ -208,8 +208,8 @@
 	padding: 3px 11px;
 	border-radius: 999px;
 	background: var(--zf-acento-suave);
-	border: 1px solid rgba(34, 197, 94, .3);
-	color: #86efac;
+	border: 1px solid rgba(239, 68, 68, .3);
+	color: #fdba74;
 	font-size: .72rem;
 	font-weight: 800;
 	text-transform: uppercase;
@@ -246,11 +246,11 @@ a.zf-equipo-link,
 	font-size: .95rem;
 }
 a.zf-equipo-link:focus-visible {
-	outline: 2px solid rgba(34, 197, 94, .65);
+	outline: 2px solid rgba(239, 68, 68, .65);
 	outline-offset: -3px;
 }
 .zf-zona-equipos li:hover {
-	border-color: rgba(34, 197, 94, .5);
+	border-color: rgba(239, 68, 68, .5);
 	transform: translateY(-2px);
 	background: linear-gradient(180deg, var(--zf-panel-3), var(--zf-panel-2));
 }
@@ -265,7 +265,7 @@ a.zf-equipo-link:focus-visible {
 
 .zf-tabla-wrap {
 	background:
-		radial-gradient(110% 80% at 50% 0%, rgba(34, 197, 94, .06), transparent 55%),
+		radial-gradient(110% 80% at 50% 0%, rgba(239, 68, 68, .06), transparent 55%),
 		var(--zf-panel);
 	border: 1px solid var(--zf-borde);
 	border-radius: var(--zf-radio);
@@ -357,7 +357,7 @@ table.zf-tabla tbody tr:nth-child(even) {
 	background: rgba(255, 255, 255, .015);
 }
 table.zf-tabla tbody tr:hover {
-	background: rgba(34, 197, 94, .06);
+	background: rgba(239, 68, 68, .06);
 }
 
 /* Columna equipo */
@@ -398,9 +398,9 @@ table.zf-tabla td.zf-col-pos {
 }
 tr.zf-clasifica .zf-pos {
 	background: linear-gradient(150deg, rgba(47, 212, 108, .25), rgba(21, 128, 61, .25));
-	border-color: rgba(34, 197, 94, .55);
-	color: #86efac;
-	box-shadow: 0 0 0 1px rgba(34, 197, 94, .12), 0 3px 10px rgba(34, 197, 94, .18);
+	border-color: rgba(239, 68, 68, .55);
+	color: #fdba74;
+	box-shadow: 0 0 0 1px rgba(239, 68, 68, .12), 0 3px 10px rgba(239, 68, 68, .18);
 }
 tr.zf-clasifica td:first-child {
 	box-shadow: inset 3px 0 0 var(--zf-acento);
@@ -419,7 +419,7 @@ table.zf-tabla td.zf-col-dif {
 	color: var(--zf-mutado);
 	font-weight: 600;
 }
-table.zf-tabla td.zf-col-dif.zf-dif-pos { color: #86efac; }
+table.zf-tabla td.zf-col-dif.zf-dif-pos { color: #fdba74; }
 table.zf-tabla td.zf-col-dif.zf-dif-neg { color: #fca5a5; }
 
 /* Forma reciente */
@@ -456,8 +456,8 @@ table.zf-tabla td.zf-col-forma {
 	width: 9px;
 	height: 9px;
 	border-radius: 50%;
-	background: linear-gradient(150deg, #2fd46c, #15803d);
-	box-shadow: 0 0 8px rgba(34, 197, 94, .5);
+	background: linear-gradient(150deg, #f87171, #dc2626);
+	box-shadow: 0 0 8px rgba(239, 68, 68, .5);
 	flex: 0 0 auto;
 }
 .zf-leyenda-forma {
@@ -480,7 +480,7 @@ table.zf-tabla td.zf-col-forma {
 	align-items: stretch;
 	gap: 16px;
 	background:
-		radial-gradient(120% 140% at 0% 0%, rgba(34, 197, 94, .05), transparent 45%),
+		radial-gradient(120% 140% at 0% 0%, rgba(239, 68, 68, .05), transparent 45%),
 		var(--zf-panel);
 	border: 1px solid var(--zf-borde);
 	border-radius: var(--zf-radio);
@@ -491,7 +491,7 @@ table.zf-tabla td.zf-col-forma {
 }
 .zf-partido:hover {
 	transform: translateY(-3px);
-	border-color: rgba(34, 197, 94, .42);
+	border-color: rgba(239, 68, 68, .42);
 	box-shadow: 0 18px 40px rgba(2, 6, 16, .55), 0 4px 10px rgba(2, 6, 16, .4);
 }
 
@@ -537,7 +537,7 @@ table.zf-tabla td.zf-col-forma {
 	border-radius: 999px;
 	background: rgba(96, 165, 250, .12);
 	border: 1px solid rgba(96, 165, 250, .28);
-	color: #9ec9fe;
+	color: #fde047;
 	font-size: .72rem;
 	font-weight: 800;
 	white-space: nowrap;
@@ -578,9 +578,9 @@ table.zf-tabla td.zf-col-forma {
 .zf-partido-equipo-visita { justify-content: flex-end; text-align: right; flex-direction: row-reverse; }
 
 /* Ganador / perdedor */
-.zf-ganador .zf-equipo-nombre { color: #86efac; text-shadow: 0 0 18px rgba(34, 197, 94, .35); }
+.zf-ganador .zf-equipo-nombre { color: #fde047; text-shadow: 0 0 18px rgba(250, 204, 21, .35); }
 .zf-perdedor .zf-equipo-nombre { color: var(--zf-mutado); }
-.zf-ganador .zf-crest { border-color: rgba(34, 197, 94, .55); box-shadow: 0 0 0 2px rgba(34, 197, 94, .18), inset 0 0 0 2px rgba(255, 255, 255, .03); }
+.zf-ganador .zf-crest { border-color: rgba(250, 204, 21, .55); box-shadow: 0 0 0 2px rgba(250, 204, 21, .18), inset 0 0 0 2px rgba(255, 255, 255, .03); }
 
 /* Centro: marcador o VS */
 .zf-partido-centro {
@@ -606,8 +606,8 @@ table.zf-tabla td.zf-col-forma {
 }
 .zf-marcador b { font-weight: 900; }
 .zf-ganador-score {
-	color: #86efac;
-	text-shadow: 0 0 14px rgba(34, 197, 94, .4);
+	color: #fde047;
+	text-shadow: 0 0 14px rgba(250, 204, 21, .4);
 }
 .zf-marcador-sep {
 	color: var(--zf-mutado);
@@ -784,12 +784,12 @@ table.zf-tabla td.zf-col-forma {
 .zf-lado-izq .zf-llave-partido {
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
-	border-right-color: rgba(34, 197, 94, .18);
+	border-right-color: rgba(239, 68, 68, .18);
 }
 .zf-lado-der .zf-llave-partido {
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
-	border-left-color: rgba(34, 197, 94, .18);
+	border-left-color: rgba(239, 68, 68, .18);
 }
 .zf-llave-ronda-titulo {
 	margin: 0 0 2px;
@@ -811,7 +811,7 @@ table.zf-tabla td.zf-col-forma {
 	transition: border-color var(--zf-transicion), transform var(--zf-transicion);
 }
 .zf-llave-partido:hover {
-	border-color: rgba(34, 197, 94, .45);
+	border-color: rgba(239, 68, 68, .45);
 	transform: translateY(-2px);
 }
 
@@ -851,8 +851,8 @@ table.zf-tabla td.zf-col-forma {
 
 /* Resultado definido */
 .zf-llave-partido .zf-ganador .zf-lp-equipo,
-.zf-llave-partido .zf-ganador .zf-lp-goles { color: #86efac; }
-.zf-llave-partido .zf-ganador .zf-lp-equipo { text-shadow: 0 0 14px rgba(34, 197, 94, .35); }
+.zf-llave-partido .zf-ganador .zf-lp-goles { color: #fde047; }
+.zf-llave-partido .zf-ganador .zf-lp-equipo { text-shadow: 0 0 14px rgba(250, 204, 21, .35); }
 .zf-llave-partido .zf-perdedor .zf-lp-equipo,
 .zf-llave-partido .zf-perdedor .zf-lp-goles { color: var(--zf-mutado); }
 
@@ -963,11 +963,11 @@ table.zf-tabla td.zf-col-forma {
 }
 .zf-fs-btn:hover {
 	color: var(--zf-texto);
-	border-color: rgba(34, 197, 94, .5);
+	border-color: rgba(239, 68, 68, .5);
 	transform: translateY(-1px);
 }
 .zf-fs-btn:focus-visible {
-	outline: 2px solid rgba(34, 197, 94, .65);
+	outline: 2px solid rgba(239, 68, 68, .65);
 	outline-offset: 2px;
 }
 .zf-fs-icono {
@@ -1074,7 +1074,7 @@ table.zf-tabla td.zf-col-forma {
 	transition: border-color var(--zf-transicion), color var(--zf-transicion), transform var(--zf-transicion);
 }
 .zf-fs-panel button:hover {
-	border-color: rgba(34, 197, 94, .5);
+	border-color: rgba(239, 68, 68, .5);
 	transform: translateY(-1px);
 }
 .zf-fs-panel .zf-fs-restaurar {
