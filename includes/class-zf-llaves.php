@@ -479,6 +479,7 @@ class ZF_Llaves {
 
 		$finalizado = ZF_Helpers::ESTADO_FINALIZADO === $d['estado'];
 		$ganador    = self::ganador_de( $partido );
+		$manual     = (int) get_post_meta( $partido->ID, '_zf_manual_cruce', true );
 
 		// Pie: penales si se definió por penales, o estado no finalizado.
 		$pie = '';
@@ -494,11 +495,12 @@ class ZF_Llaves {
 		}
 
 		$marcador = $finalizado ? esc_html( $d['gl'] ) . '&ndash;' . esc_html( $d['gv'] ) : esc_html__( 'vs', 'zonas-partidos-futbol' );
-		$html = '<div class="zf-pp-resultado">'
+		$html = '<div class="zf-pp-resultado' . ( $manual ? ' is-manual' : '' ) . '">'
 			. self::panel_pp_equipo( $d['local'], $ganador, $finalizado, $d['gl'] )
 			. '<span class="zf-pp-marcador">' . $marcador . '</span>'
 			. self::panel_pp_equipo( $d['visitante'], $ganador, $finalizado, $d['gv'] )
 			. '<a class="zf-pp-enlace" href="' . esc_url( get_edit_post_link( $partido->ID ) ) . '" title="' . esc_attr__( 'Editar partido', 'zonas-partidos-futbol' ) . '">' . esc_html__( 'Editar', 'zonas-partidos-futbol' ) . '</a>'
+			. ( $manual ? '<span class="zf-pp-manual">' . esc_html__( 'Fijado a mano', 'zonas-partidos-futbol' ) . '</span>' : '' )
 			. ( $pie ? '<span class="zf-pp-pie">' . esc_html( $pie ) . '</span>' : '' )
 			. '</div>';
 
@@ -990,11 +992,15 @@ class ZF_Llaves {
 				$partido = isset( $agrupado[ $r ][ $j ] ) ? $agrupado[ $r ][ $j ] : null;
 
 				if ( $partido ) {
-					if ( (int) get_post_meta( $partido->ID, '_zf_local', true ) !== $local ) {
-						update_post_meta( $partido->ID, '_zf_local', $local );
-					}
-					if ( (int) get_post_meta( $partido->ID, '_zf_visitante', true ) !== $visita ) {
-						update_post_meta( $partido->ID, '_zf_visitante', $visita );
+					// Un cruce fijado a mano no se reemplaza por los cruces automáticos.
+					$manual_cruce = (int) get_post_meta( $partido->ID, '_zf_manual_cruce', true );
+					if ( ! $manual_cruce ) {
+						if ( (int) get_post_meta( $partido->ID, '_zf_local', true ) !== $local ) {
+							update_post_meta( $partido->ID, '_zf_local', $local );
+						}
+						if ( (int) get_post_meta( $partido->ID, '_zf_visitante', true ) !== $visita ) {
+							update_post_meta( $partido->ID, '_zf_visitante', $visita );
+						}
 					}
 					$siguiente[ $j ] = self::ganador_de( $partido );
 				} else {

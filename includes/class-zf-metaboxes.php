@@ -48,6 +48,11 @@ class ZF_Metaboxes {
 		$visitante_id = $d ? $d['visitante'] : 0;
 		$lugar        = $d ? $d['lugar'] : '';
 		$jornada      = $d ? $d['jornada'] : '';
+
+		// Partidos de llave: permiten fijar el cruce a mano (el avance
+		// automático no reemplaza los equipos mientras esté fijado).
+		$llave_id = (int) get_post_meta( $post->ID, '_zf_llave', true );
+		$manual   = $llave_id && (int) get_post_meta( $post->ID, '_zf_manual_cruce', true );
 		$estado       = $d && $d['estado'] ? $d['estado'] : ZF_Helpers::ESTADO_PROGRAMADO;
 		$gl           = $d ? $d['gl'] : 0;
 		$gv           = $d ? $d['gv'] : 0;
@@ -115,6 +120,17 @@ class ZF_Metaboxes {
 							<?php endforeach; ?>
 						</select>
 					</p>
+					<?php if ( $llave_id ) : ?>
+						<p class="zf-campo zf-campo--completo">
+							<label class="zf-fijar-cruce" for="zf_manual_cruce">
+								<input type="checkbox" name="zf_manual_cruce" id="zf_manual_cruce" value="1" <?php checked( $manual ); ?> />
+								<span>
+									<strong><?php esc_html_e( 'Fijar cruce a mano', 'zonas-partidos-futbol' ); ?></strong>
+									<em><?php esc_html_e( 'El armado automático de la llave no reemplaza estos equipos mientras esté marcado. Si cambiás los equipos, se marca solo.', 'zonas-partidos-futbol' ); ?></em>
+								</span>
+							</label>
+						</p>
+					<?php endif; ?>
 				</div>
 			</section>
 			<section class="zf-seccion zf-seccion--agenda">
@@ -189,7 +205,7 @@ class ZF_Metaboxes {
 				</div>
 			</section>
 
-			<p class="zf-metabox-nota"><?php esc_html_e( 'Para cargar un resultado: marcá el estado "Finalizado" y completá los goles. Si terminó empatado, cargá también los penales y el ganador se define solo. En partidos de una llave, avanza automáticamente al cruce siguiente.', 'zonas-partidos-futbol' ); ?></p>
+			<p class="zf-metabox-nota"><?php esc_html_e( 'Para cargar un resultado: marcá el estado "Finalizado" y completá los goles. Si terminó empatado, cargá también los penales y el ganador se define solo. En partidos de una llave, avanza automáticamente al cruce siguiente; podés armar a mano cualquier cruce cambiando los equipos y no será pisado por el armado automático.', 'zonas-partidos-futbol' ); ?></p>
 		</div>
 		<?php
 	}
@@ -234,6 +250,16 @@ class ZF_Metaboxes {
 		if ( $local_id === $visitante_id ) {
 			set_transient( 'zf_error_' . $post_id, __( 'El local y el visitante no pueden ser el mismo equipo.', 'zonas-partidos-futbol' ), 60 );
 			return;
+		}
+		// Fijación manual de cruce (solo aplica a partidos de llave): si el
+		// admin cambia los equipos se fija solo, y el avance automático no
+		// volverá a reemplazarlos al recalcular la llave.
+		$llave_id = (int) get_post_meta( $post_id, '_zf_llave', true );
+		if ( $llave_id ) {
+			$stored_local  = (int) get_post_meta( $post_id, '_zf_local', true );
+			$stored_visita = (int) get_post_meta( $post_id, '_zf_visitante', true );
+			$manual        = ( $local_id !== $stored_local || $visitante_id !== $stored_visita ) ? 1 : ( ! empty( $_POST['zf_manual_cruce'] ) ? 1 : 0 );
+			update_post_meta( $post_id, '_zf_manual_cruce', $manual );
 		}
 		// Los penales se guardan siempre tal cual se cargan; su efecto se evalúa
 		// al leer los datos (solo definen ganador si finalizó empatado).

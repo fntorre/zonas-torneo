@@ -231,6 +231,39 @@
 	font-size: 16px !important;
 }
 
+/* Fijar cruce a mano (partidos de llave) */
+.zf-fijar-cruce {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	margin: 2px 0 0;
+	cursor: pointer;
+}
+.zf-fijar-cruce input[type="checkbox"] {
+	margin-top: 2px;
+	width: 14px;
+	height: 14px;
+}
+.zf-fijar-cruce span {
+	display: block;
+}
+.zf-fijar-cruce strong {
+	display: block;
+	color: #0f766e;
+	font-size: 11px;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .04em;
+}
+.zf-fijar-cruce em {
+	display: block;
+	margin-top: 2px;
+	color: #475569;
+	font-size: 11px;
+	line-height: 1.45;
+	font-style: normal;
+}
+
 /* Chips (zonas de una llave) */
 .zf-chips {
 	display: flex;
@@ -1866,6 +1899,17 @@
 	font-weight: 600;
 	color: #b45309;
 }
+.zf-pp-manual {
+	flex: 0 0 auto;
+	font-size: 10.5px;
+	font-weight: 700;
+	padding: 1px 7px;
+	border: 1px solid #99f6e4;
+	border-radius: 999px;
+	background: #f0fdfa;
+	color: #0f766e;
+	white-space: nowrap;
+}
 
 /* — TEMA OSCURO: resultados en el admin — */
 .zf-ll-preview-card.is-played {
@@ -1919,6 +1963,11 @@
 }
 .zf-pp-pie {
 	color: #fcd34d;
+}
+.zf-pp-manual {
+	border-color: #134e4a;
+	background: #042f2e;
+	color: #5eead4;
 }
 
 /* ===== Fase clasificatoria (metabox llave) ===== */
