@@ -62,7 +62,8 @@ class ZF_Llaves {
 		$config = get_post_meta( $post->ID, '_zf_config', true );
 		$clasi  = get_post_meta( $post->ID, '_zf_clasi', true );
 		$modo   = self::modo_de_config( $config );
-		$activo = self::MODO_CLASIFICATORIA === $modo || ( is_array( $clasi ) && ! empty( $clasi['modo'] ) );
+		$activo = self::MODO_CLASIFICATORIA === $modo
+			|| ( is_array( $clasi ) && ( ! empty( $clasi['modo'] ) || ! empty( $clasi['clasif'] ) || ! empty( $clasi['directos'] ) ) );
 
 		// El JS de admin corre en AMBOS modos (clásico y clasificatoria). Encargarlo
 		// aca asegura que el filtrado de equipos por lado se aplique también en la
@@ -571,6 +572,9 @@ class ZF_Llaves {
 			update_post_meta( $post_id, '_zf_clasi', $clasi_data );
 		}
 
+		// Casilla "Regenerar fixture" (modo clásico).
+		$regenerar = ! empty( $_POST['zf_regenerar'] );
+
 		// En la fase clasificatoria, el guardado SIEMPRE (re)genera el fixture,
 		// sin depender de la casilla "Regenerar": cada vez que se guarda la
 		// configuración de la fase (cruces y directos) se actualizan los 16avos.
@@ -578,15 +582,14 @@ class ZF_Llaves {
 			$regenerar = true;
 		}
 
-		// Sincroniza el modoo en _zf_config con el toggle, para que al recargar
+		// Sincroniza el modo en _zf_config con el toggle, para que al recargar
 		// el metabox vuelva a mostrar la sección de la fase clasificatoria
-		// incluso si todavía no se regeneró el fixture completo.
-		if ( ! $regenerar ) {
-			$config            = get_post_meta( $post_id, '_zf_config', true );
-			$config            = is_array( $config ) ? $config : array();
-			$config['modo']    = $modo_clasi ? self::MODO_CLASIFICATORIA : '';
-			update_post_meta( $post_id, '_zf_config', $config );
-		}
+		// incluso si todavía no se regeneró el fixture completo (o si falló
+		// la validación de los cruces y el guardado retornó antes).
+		$config         = get_post_meta( $post_id, '_zf_config', true );
+		$config         = is_array( $config ) ? $config : array();
+		$config['modo'] = $modo_clasi ? self::MODO_CLASIFICATORIA : '';
+		update_post_meta( $post_id, '_zf_config', $config );
 
 		if ( $regenerar ) {
 			if ( $modo_clasi ) {

@@ -648,7 +648,7 @@
 		var selects = rootEl.querySelectorAll('select.zf-select-equipo[data-zf-side="' + lado + '"]');
 		for (var i = 0; i < selects.length; i++) {
 			var s = selects[i];
-			if (s === paraEsteSelect) continue Strange;
+			if (s === paraEsteSelect) continue;
 			var v = parseInt(s.value, 10);
 			if (v > 0) usados[v] = true;
 		}
