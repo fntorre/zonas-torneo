@@ -125,6 +125,7 @@
 
 		var fit = wrap.querySelector( '.zf-llave-fit' );
 		var grid = wrap.querySelector( '.zf-llave-grid' );
+		var scroll = wrap.querySelector( '.zf-llave-scroll' );
 		if ( fit ) {
 			fit.style.width = '';
 			fit.style.height = '';
@@ -133,6 +134,11 @@
 		}
 		if ( grid ) {
 			grid.style.transform = '';
+			grid.style.transformOrigin = '';
+		}
+		if ( scroll ) {
+			scroll.scrollLeft = 0;
+			scroll.scrollTop = 0;
 		}
 		var nivel = wrap.querySelector( '.zf-fs-nivel' );
 		if ( nivel ) {
@@ -186,11 +192,12 @@
 	}
 
 	function salir( wrap ) {
+		// Limpieza síncrona y determinista: aunque el evento fullscreenchange
+		// se retrase o no llegue, el cuadro vuelve a su tamaño natural.
 		wrap.classList.remove( 'zf-fs-activo' );
+		limpiar( wrap );
 		if ( fullscreenElement() === wrap ) {
 			salirFullscreen();
-		} else {
-			limpiar( wrap );
 		}
 	}
 
