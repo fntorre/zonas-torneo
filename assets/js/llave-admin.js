@@ -626,26 +626,23 @@
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Fase clasificatoria: al elegir un equipo en un select (partido de
-// clasificatoria o pre-clasificado), ese equipo deja de estar disponible
-// en los demás selects del MISMO lado. Al vaciar el select vuelve a estar
-// disponible. No usa dependencias externas.
+// clasificatoria o pre-clasificado), ese equipo desaparece de las opciones
+// de TODOS los demás selects de la llave (ambos lados). Al vaciar el select,
+// el equipo vuelve a aparecer. No usa dependencias externas.
 // ─────────────────────────────────────────────────────────────────────────────
 (function () {
 	'use strict';
 
 	var rootEl = null;
 
-	function esc(s) {
-		return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-			return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-		});
-	}
-
-	// Devuelve los IDs ya elegidos en un lado, excluyendo el select actual.
-	function idsUsadosEnLado(lado, paraEsteSelect) {
+	// Devuelve los IDs ya elegidos en cualquier select de la llave,
+	// excluyendo el select actual. La restricción es GLOBAL: una vez que
+	// un equipo se elige en un partido de clasificación o como
+	// pre-clasificado (de cualquier lado), ya no puede volver a elegirse.
+	function idsUsadosGlobalmente(paraEsteSelect) {
 		var usados = {};
 		if (!rootEl) return usados;
-		var selects = rootEl.querySelectorAll('select.zf-select-equipo[data-zf-side="' + lado + '"]');
+		var selects = rootEl.querySelectorAll('select.zf-select-equipo');
 		for (var i = 0; i < selects.length; i++) {
 			var s = selects[i];
 			if (s === paraEsteSelect) continue;
@@ -655,32 +652,48 @@
 		return usados;
 	}
 
-	// Refresca un lado: deshabilita opciones ya tomadas por otros selects.
-	function refrescarLado(lado) {
+	// Guarda las opciones originales del select la primera vez que se toca,
+	// para poder restaurarlas cuando un equipo queda libre.
+	function opcionesOriginales(s) {
+		if (!s._zfOpciones) {
+			s._zfOpciones = s.innerHTML;
+		}
+		return s._zfOpciones;
+	}
+
+	// Refresca TODOS los selects: elimina de cada uno las opciones que ya
+	// fueron tomadas por otro select, para que directamente no puedan elegirse.
+	function refrescarSelects() {
 		if (!rootEl) return;
-		var selects = rootEl.querySelectorAll('select.zf-select-equipo[data-zf-side="' + lado + '"]');
+		var selects = rootEl.querySelectorAll('select.zf-select-equipo');
 		for (var i = 0; i < selects.length; i++) {
 			var s = selects[i];
-			var usados = idsUsadosEnLado(lado, s);
+			var usados = idsUsadosGlobalmente(s);
+			var actual = s.value;
+			s.innerHTML = opcionesOriginales(s);
 			var opciones = s.querySelectorAll('option');
+			// querySelectorAll devuelve una lista estática: se recolectan
+			// primero las opciones a quitar y se eliminan después, sin
+			// tocar el índice del bucle (evita un loop infinito).
+			var aRemover = [];
 			for (var j = 0; j < opciones.length; j++) {
 				var o = opciones[j];
 				var val = parseInt(o.value, 10);
 				if (val > 0 && usados[val]) {
-					o.disabled = true;
-				} else {
-					o.disabled = false;
+					aRemover.push(o);
 				}
 			}
+			for (var k = 0; k < aRemover.length; k++) {
+				aRemover[k].remove();
+			}
+			s.value = actual;
 		}
 	}
 
 	function onCambio(e) {
 		var s = e.target;
 		if (!s || !s.classList || !s.classList.contains('zf-select-equipo')) return;
-		var lado = s.getAttribute('data-zf-side');
-		if (!lado) return;
-		refrescarLado(lado);
+		refrescarSelects();
 	}
 
 	function initClasi() {
@@ -688,7 +701,7 @@
 		if (!rootEl) return;
 		rootEl.addEventListener('change', onCambio);
 		// Estado inicial: aplicá la regla por si ya hay datos persistidos.
-		['izq', 'der'].forEach(function (lado) { refrescarLado(lado); });
+		refrescarSelects();
 	}
 
 	if (document.readyState === 'loading') {

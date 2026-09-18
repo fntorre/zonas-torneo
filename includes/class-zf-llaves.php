@@ -659,9 +659,16 @@ class ZF_Llaves {
 					return array( 'clasif' => $clasif, 'directos' => $directos, 'errores' => $errores );
 				}
 				foreach ( array( $local, $visita ) as $equipo_id ) {
-					if ( ! isset( $usados[ $equipo_id ] ) ) {
-						$usados[ $equipo_id ] = array( 'campo' => sprintf( 'clasificatoria %s · partido %d', $lado, $i + 1 ) );
+					if ( isset( $usados[ $equipo_id ] ) ) {
+						$errores[] = sprintf(
+							/* translators: %1$s: nombre del equipo. %2$s: primera aparición. */
+							__( 'El equipo %1$s está repetido (ya figura en: %2$s). Cada equipo solo puede participar una vez.', 'zonas-partidos-futbol' ),
+							ZF_Helpers::nombre_equipo( $equipo_id ),
+							$usados[ $equipo_id ]['campo']
+						);
+						return array( 'clasif' => $clasif, 'directos' => $directos, 'errores' => $errores );
 					}
+					$usados[ $equipo_id ] = array( 'campo' => sprintf( 'clasificatoria %s · partido %d', $lado, $i + 1 ) );
 				}
 			}
 		}
