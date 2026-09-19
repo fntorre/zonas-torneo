@@ -116,13 +116,14 @@ class ZF_Shortcodes {
 	// =========================== [zf_equipos] ===============================
 
 	/**
-	 * Grid de todos los equipos inscriptos (sin agrupar por zona).
+	 * Grid de los equipos participantes del torneo, es decir, los que están
+	 * incluidos en alguna llave (no los inscriptos que quedaron afuera).
 	 *
 	 * @return string
 	 */
 	public static function equipos() {
 		self::css();
-		$equipos = ZF_Helpers::equipos();
+		$equipos = ZF_Helpers::equipos_de_llaves();
 		ob_start();
 		echo '<div class="zf-zonas">';
 		echo '<section class="zf-zona-card">';
@@ -149,7 +150,7 @@ class ZF_Shortcodes {
 				echo '</a></li>';
 			}
 		} else {
-			echo '<li class="zf-vacio">' . esc_html__( 'No hay equipos inscriptos todavía.', 'zonas-partidos-futbol' ) . '</li>';
+			echo '<li class="zf-vacio">' . esc_html__( 'Todavía no hay equipos en las llaves.', 'zonas-partidos-futbol' ) . '</li>';
 		}
 		echo '</ul></section>';
 		echo '</div>';

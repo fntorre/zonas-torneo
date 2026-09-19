@@ -108,6 +108,112 @@ class ZF_Helpers {
 	}
 
 	/**
+	 * Equipos que participan en alguna llave (playoffs).
+	 *
+	 * Solo incluye equipos que están en alguna llave publicada: puede haber
+	 * inscriptos que no juegan el torneo, y esos no deben aparecer. Reúne los
+	 * IDs desde la configuración de cada llave (modo clásico y clasificatoria)
+	 * y desde los cruces creados en esas llaves, y devuelve los posts de equipo.
+	 *
+	 * @return WP_Post[]
+	 */
+	public static function equipos_de_llaves() {
+		$ids = array();
+
+		$llaves = get_posts(
+			array(
+				'post_type'      => ZF_Install::CPT_LLAVE,
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			)
+		);
+
+		foreach ( $llaves as $llave_id ) {
+			$config = get_post_meta( $llave_id, '_zf_config', true );
+			if ( is_array( $config ) ) {
+				foreach ( array( 'equipos', 'seeds' ) as $clave ) {
+					if ( ! empty( $config[ $clave ] ) && is_array( $config[ $clave ] ) ) {
+						foreach ( $config[ $clave ] as $id ) {
+							$id = (int) $id;
+							if ( $id > 0 ) {
+								$ids[ $id ] = $id;
+							}
+						}
+					}
+				}
+			}
+
+			$clasi = get_post_meta( $llave_id, '_zf_clasi', true );
+			if ( is_array( $clasi ) ) {
+				if ( ! empty( $clasi['clasif'] ) && is_array( $clasi['clasif'] ) ) {
+					foreach ( $clasi['clasif'] as $lado => $partidos ) {
+						if ( ! is_array( $partidos ) ) {
+							continue;
+						}
+						foreach ( $partidos as $m ) {
+							if ( ! is_array( $m ) ) {
+								continue;
+							}
+							foreach ( array( 'local', 'visitante' ) as $campo ) {
+								$id = (int) ( $m[ $campo ] ?? 0 );
+								if ( $id > 0 ) {
+									$ids[ $id ] = $id;
+								}
+							}
+						}
+					}
+				}
+				foreach ( array( 'izq', 'der' ) as $lado ) {
+					$directos = isset( $clasi['directos'][ $lado ] ) ? (array) $clasi['directos'][ $lado ] : array();
+					foreach ( $directos as $id ) {
+						$id = (int) $id;
+						if ( $id > 0 ) {
+							$ids[ $id ] = $id;
+						}
+					}
+				}
+			}
+		}
+
+		// Cobertura extra: cruces de llave armados a mano que no estén en la
+		// configuración guardada (sus equipos participan igual).
+		$cruces = get_posts(
+			array(
+				'post_type'      => ZF_Install::CPT_PARTIDO,
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+				'meta_key'       => '_zf_llave',
+				'meta_compare'   => 'EXISTS',
+			)
+		);
+		foreach ( $cruces as $cruce_id ) {
+			foreach ( array( '_zf_local', '_zf_visitante' ) as $clave ) {
+				$id = (int) get_post_meta( $cruce_id, $clave, true );
+				if ( $id > 0 ) {
+					$ids[ $id ] = $id;
+				}
+			}
+		}
+
+		if ( empty( $ids ) ) {
+			return array();
+		}
+
+		return get_posts(
+			array(
+				'post_type'      => 'if_equipo',
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'orderby'        => 'title',
+				'order'          => 'ASC',
+				'include'        => array_values( $ids ),
+			)
+		);
+	}
+
+	/**
 	 * Equipos de una zona.
 	 *
 	 * @param int $term_id ID de la zona.
